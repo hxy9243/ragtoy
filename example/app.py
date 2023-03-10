@@ -1,8 +1,8 @@
 import os
 import sys
-import csv
 
 from dotenv import load_dotenv
+import pandas as pd
 import tiktoken
 import openai
 
@@ -55,25 +55,25 @@ def split_chunks(text: str, max_tokens=MAX_TOKENS):
 
 
 def create_embeddings(chunks):
-    embedding_data = []
-    for _, chunk in chunks:
+    embedding_data = pd.DataFrame(chunks, columns=['text'])
+
+    embeddings = []
+    for chunk in chunks:
         embedding = openai.Embedding.create(
             input=[chunk], model=EMBEDDING_MODEL)['data'][0]['embedding']
-        embedding_data.append((chunk, embedding))
 
+        embeddings.append(embedding)
+
+    embedding_data['embedding'] = embeddings
     return embedding_data
 
 
 def get_embeddings(csvfile, chunks):
     if os.path.exists(csvfile):
-        with open(csvfile, 'rw') as f:
-            embedding_data = []
-
-            reader = csv.reader(f, delimiter=',')
-            for r in reader:
-                embedding_data.append(r)
+        embedding_data = pd.read_csv(csvfile)
     else:
         embedding_data = create_embeddings(chunks)
+        embedding_data.to_csv(csvfile)
 
     return embedding_data
 
@@ -96,7 +96,9 @@ def main():
     load_dotenv()
     openai.api_key = os.getenv('OPENAI_API_KEY')
 
-    embedding_data = create_emebeddings(chunks)
+    embedding_data = get_embeddings('turing_embedding.csv', chunks)
+
+    print(embedding_data)
 
 
 if __name__ == '__main__':
