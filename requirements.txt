@@ -1,4 +1,5 @@
 openai>=0.27.1
+openai[embeddings]
 tiktoken>=0.3.0
 wikipedia>=1.4.0
 beautifulsoup4>=4.11.2
