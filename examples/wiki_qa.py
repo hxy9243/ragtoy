@@ -169,7 +169,9 @@ def ask_question(question,
 
 
 def main():
-    text = get_text('turing.txt', WIKI_PAGE)
+    wikiname = WIKI_PAGE.split('/')[-1]
+
+    text = get_text(f'{wikiname}.txt', WIKI_PAGE)
 
     text = text_preproc(text)
     chunks = split_chunks(text)
@@ -178,7 +180,7 @@ def main():
     load_dotenv()
     openai.api_key = os.getenv('OPENAI_API_KEY')
 
-    embedding_data = get_embeddings('turing_embedding.csv', sentences)
+    embedding_data = get_embeddings(f'{wikiname}_embedding.csv', sentences)
     embedding_data['ntokens'] = pd.Series([n for n, _ in chunks])
 
     print(embedding_data)
