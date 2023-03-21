@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import os
 import sys
 import time
@@ -7,6 +9,7 @@ import pandas as pd
 import numpy as np
 import wikipedia
 from bs4 import BeautifulSoup as BS4
+from spacy.lang.en import English
 import tiktoken
 import openai
 from openai.embeddings_utils import distances_from_embeddings
@@ -45,14 +48,8 @@ def text_preproc(serie: str):
     return serie
 
 
-def split_chunks(text: str, max_tokens=MAX_CHUNK_TOKENS):
-    '''Split text into chunks of no longer than max_tokens.a
-    '''
-
+def group_chunks(sentences, max_tokens) -> Tuple[str, int]:
     tokenizer = tiktoken.get_encoding(TOKEN_MODEL)
-
-    # use an approximate way to split sentences
-    sentences = text.split('. ')
 
     # Get the number of tokens for each sentence
     n_tokens = [len(tokenizer.encode(" " + sentence))
@@ -72,6 +69,35 @@ def split_chunks(text: str, max_tokens=MAX_CHUNK_TOKENS):
         chunk.append(sentence)
 
     return chunks
+
+
+def spacy_paragraphs(text) -> Tuple[str, int]:
+    chunks = []
+    existing_ps = []
+
+    # text = text_preproc(text)
+    nlp = English()
+    nlp.add_pipe('sentencizer')
+
+    paragraphs = text.split('\n\n')
+    for i, p in enumerate(paragraphs):
+        existing_ps.append(p)
+
+        if len(p) < 32 and i < len(paragraphs)-1:
+            continue
+
+        cs = spacy_chunks(nlp, '\n'.join(existing_ps))
+        chunks += cs
+        existing_ps = []
+
+    return chunks
+
+
+def spacy_chunks(pipeline, text) -> Tuple[str, int]:
+    doc = pipeline(text)
+    sentences = [sent.text for sent in doc.sents]
+
+    return group_chunks(sentences, max_tokens=MAX_CHUNK_TOKENS)
 
 
 def create_openai_embeddings(sentences):
@@ -142,10 +168,11 @@ def create_context(question, embedding_data, max_chunks=5, max_length=1800):
 
 def ask_question(question,
                  embedding_data,
-                 max_length=1800,
-                 max_tokens=200,
+                 max_embedding_length=1800,
+                 max_tokens=600,
                  model='text-davinci-003'):
-    context = create_context(question, embedding_data, max_length=max_length)
+    context = create_context(question, embedding_data,
+                             max_length=max_embedding_length)
     prompt = 'Answer the question based on the context, and if it ' + \
         'cannot be answered based on the context, say "I don\'t know"\n' + \
         f'Context:\n{context}\n' + \
@@ -173,17 +200,17 @@ def main():
 
     text = get_text(f'{wikiname}.txt', WIKI_PAGE)
 
-    text = text_preproc(text)
-    chunks = split_chunks(text)
+    chunks = spacy_paragraphs(text)
     sentences = [sentence for _, sentence in chunks]
 
     load_dotenv()
     openai.api_key = os.getenv('OPENAI_API_KEY')
 
+    for chunk in chunks:
+        print(chunk)
+
     embedding_data = get_embeddings(f'{wikiname}_embedding.csv', sentences)
     embedding_data['ntokens'] = pd.Series([n for n, _ in chunks])
-
-    print(embedding_data)
 
     while True:
         try:
