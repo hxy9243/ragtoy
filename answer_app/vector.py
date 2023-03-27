@@ -1,7 +1,5 @@
 import redis
-from redis.commands.search.fields import VectorField, TagField
-from redis.commands.search.indexDefinition import IndexDefinition, IndexType
-from redis import Connection
+from redis.commands.search.field import VectorField, TagField
 
 
 GPT3_EMBEDDING_SIZE = 2048
@@ -10,41 +8,38 @@ GPT3_EMBEDDING_SIZE = 2048
 class VectorSearch:
 
     def __init__(self,
+                 index,
                  host='localhost',
-                 port=6379):
+                 port=6379,
+                 embedding_size=GPT3_EMBEDDING_SIZE,
+                 ):
         self.conn = redis.Redis(host=host, port=port)
+        self.index = index
+        self.embedding_size = embedding_size
 
-    def create(self, key):
+    def create_index(self):
         schema = [
-            VectorField('$.embedding',
+            VectorField('embedding',
                         'hnsw',
                         {
                             "TYPE": 'FLOAT32',
-                            "DIM": GPT3_EMBEDDING_SIZE,
+                            "DIM": self.embedding_size,
                             "DISTANCE_METRIC": 'cosine',
-                        },
-                        as_name='embedding',
-                        ),
-            TagField('$.text_id', as_name='text_id')
+                        }),
+            TagField('text_id'),
         ]
-        idx_def: IndexDefinition = IndexDefinition(
-            index_type=IndexType.JSON, prefix=['key:'])
-        self.conn.ft('idx').create_index(schema, definition=idx_def)
-        pipe: Connection = self.conn.pipeline()
+        self.conn.ft(self.index).create_index(schema)
 
-        for id, vec in self.image_dict.items():
-            pipe.json().set(
-                f'key:{id}', '$',
-                {
-                    'text_id': id, 'embedding': vec
-                },
-            )
-        pipe.execute()
+    def drop_index(self):
+        self.conn.ft(self.index).dropindex(delete_documents=True)
 
-    def put(self, key, vector, metadata):
-
+    def put(self, key, embedding, text_id):
+        self.conn.hset(key, mapping={
+            'embedding': embedding,
+            'text_id': text_id,
+        })
         pass
 
-    def search(self, key, vecotr, max=5):
+    def search(self, key, vector, max=5):
 
-        pass
+     pass
