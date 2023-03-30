@@ -1,5 +1,6 @@
 import redis
 from redis.commands.search.field import VectorField, TagField
+from redis.commands.search.query import Query
 
 import numpy as np
 
@@ -51,7 +52,23 @@ class VectorSearch:
         data = self.get(key, 'embedding')
         return np.frombuffer(data, dtype=np.float32)
 
+    def search(self, vector, max=5):
+        querystr = f'*=>[KNN {max} @embedding $vector AS vector_score]'
+        query = Query(querystr).return_fields(
+            'vector_score', 'embedding', 'text_id',
+        ).sort_by('vector_score').dialect(2)
 
-    def search(self, key, vector, max=5):
+        results = self.conn.ft(self.index).search(
+            query,
+            query_params={'vector': vector.tobytes()},
+        )
 
-        pass
+        ret = []
+        for r in results.docs:
+            print(r.id)
+            ret.append({
+                'key': r.id,
+                'vector_score': r.vector_score,
+                'text_id': r.text_id,
+            })
+        return ret
