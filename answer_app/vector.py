@@ -42,4 +42,4 @@ class VectorSearch:
 
     def search(self, key, vector, max=5):
 
-     pass
+        pass
