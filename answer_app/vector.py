@@ -1,6 +1,7 @@
 import redis
 from redis.commands.search.field import VectorField, TagField
 
+import numpy as np
 
 GPT3_EMBEDDING_SIZE = 2048
 
@@ -35,10 +36,21 @@ class VectorSearch:
 
     def put(self, key, embedding, text_id):
         self.conn.hset(key, mapping={
-            'embedding': embedding,
+            'embedding': embedding.tobytes(),
             'text_id': text_id,
         })
         pass
+
+    def get(self, key, field):
+        return self.conn.hget(key, field)
+
+    def get_textid(self, key):
+        return self.get(key, 'text_id').decode('utf-8')
+
+    def get_embedding(self, key):
+        data = self.get(key, 'embedding')
+        return np.frombuffer(data, dtype=np.float32)
+
 
     def search(self, key, vector, max=5):
 
