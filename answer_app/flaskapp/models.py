@@ -1,5 +1,3 @@
-import uuid
-
 from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey
 
@@ -43,6 +41,11 @@ class Conversation(db.Model):
     doc = relationship(
         'Document', back_populates='conversations',
     )
+    messages = relationship(
+        'Message',
+        cascade='all, delete-orphan',
+        back_populates='conversation'
+    )
 
     def __repr__(self):
         return f'<Conversation {self.convid}>'
@@ -60,11 +63,28 @@ class Message(db.Model):
     msgid = db.Column('id', db.String(16), primary_key=True)
     convid = db.Column('convid', db.ForeignKey('conversations.id'),
                        nullable=False)
+    index = db.Column('index', db.Integer)
     msg = db.Column('message', db.Text)
     msgtype = db.Column('type', db.String(32))
     context = db.Column('context', db.Text)
     ntokens = db.Column('ntokens', db.Integer)
     time = db.Column('time', db.DateTime)
 
+    conversation = relationship(
+        'Conversation', back_populates='messages',
+    )
+
     def __repr__(self):
         return f'<Message {self.convid}>'
+
+    def data(self):
+        return {
+            'convid': self.convid,
+            'id': self.msgid,
+            'index': self.index,
+            'msg': self.msg,
+            'msgtype': self.msgtype,
+            'context': self.context,
+            'ntokens': self.ntokens,
+            'time': self.time.isoformat(),
+        }

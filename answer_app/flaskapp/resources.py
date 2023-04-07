@@ -1,6 +1,7 @@
 import logging
 import hashlib
 import uuid
+import datetime
 
 from flask_restful import Resource
 from flask import make_response, request
@@ -15,7 +16,7 @@ class DocumentsApi(Resource):
             docs = db.session.execute(db.select(Document)).scalars()
         except Exception as exec:
             logging.error(f'Error querying database: {exec}')
-            return make_response({'error': str(exec)}, status=500)
+            return make_response({'error': str(exec)}, 500)
 
         results = []
         for doc in docs:
@@ -48,7 +49,7 @@ class DocumentsApi(Resource):
         db.session.add(newdoc)
         db.session.commit()
 
-        return make_response(newdoc.data(), status=201)
+        return make_response(newdoc.data(), 201)
 
 
 class DocumentApi(Resource):
@@ -109,25 +110,62 @@ class ConversationsApi(Resource):
 
 class ConversationApi(Resource):
     def get(self, convid):
-        convs = db.session.execute(
+        conv = db.one_or_404(
             db.select(Conversation).
-            where(Conversation.convid == convid)).scalar_one()
+            where(Conversation.convid == convid))
 
-        results = []
-        for conv in convs:
-            results.append(conv.data())
+        return conv.data()
 
-        return results
-
-    def post(self, conv_id):
-        user = request.form['user']
-        docid = request.form['docid']
-
-        newconv = Conversation(
-            user=user,
-            docid=docid,
+    def delete(self, convid):
+        conv = db.one_or_404(
+            db.select(Document).where(Conversation.convid == convid),
+            description=f'Error 404: no conversation found with id {convid}',
         )
-        db.session.add(newconv)
+        db.session.delete(conv)
         db.session.commit()
 
-        return make_response(newconv.data())
+
+class MessagesApi(Resource):
+    def get(self, convid):
+        msgs = db.session.execute(
+            db.select(Message).
+            where(Message.convid == convid)
+        ).scalars()
+
+        results = []
+        for m in msgs:
+            results.append(m.data())
+        return results
+
+    def post(self, convid):
+        msgtext = request.form['message']
+        msgtype = request.form['message-type']
+
+        with db.session.begin():
+            conv = db.one_or_404(
+                db.select(Conversation).
+                where(Conversation.convid == convid)
+            )
+
+            lastmessage = db.session.execute(
+                db.select(Message).
+                where(Message.convid == convid).
+                order_by(Message.index.desc())
+            ).scalar()
+
+            index = 1
+            if lastmessage:
+                index = lastmessage.index + 1
+
+            msg = Message(
+                msgid=str(uuid.uuid4()),
+                convid=conv.convid,
+                index=index,
+                msg=msgtext,
+                msgtype=msgtype,
+                time=datetime.datetime.now(),
+            )
+
+            db.session.add(msg)
+
+        return msg.data()
