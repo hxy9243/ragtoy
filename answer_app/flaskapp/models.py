@@ -10,7 +10,7 @@ class Document(db.Model):
     doctype = db.Column('type', db.String(16), default='text')
     hash = db.Column('hash', db.String(64))
     body = db.Column('body', db.Text)
-    vectorid = db.Column('text', db.String(64))
+    vectorid = db.Column('vector', db.String(64))
 
     def __repr__(self):
         return f'<Document {self.docid}>'
@@ -19,6 +19,7 @@ class Document(db.Model):
         return {
             'id': self.docid,
             'body': self.body,
+            'type': self.doctype,
         }
 
 
