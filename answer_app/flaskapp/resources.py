@@ -11,10 +11,10 @@ from flaskapp.config import db
 class DocumentsApi(Resource):
     def get(self):
         try:
-            docs = Document.query.all()
+            docs = db.session.execute(db.select(Document)).scalars()
         except Exception as exec:
             logging.error(f'Error querying database: {exec}')
-            return Response({'error': str(exec)})
+            return Response({'error': str(exec)}, status=500)
 
         results = []
         for doc in docs:
@@ -29,8 +29,10 @@ class DocumentsApi(Resource):
         body = request.form['document']
         doctype = request.form['type']
 
-        existing = Document.query.filter_by(
-            hash=self._get_hash(body),
+        existing = db.session.execute(
+            db.select(Document).filter_by(
+                hash=self._get_hash(body)
+            ),
         ).first()
 
         if existing:
@@ -49,12 +51,18 @@ class DocumentsApi(Resource):
 
 class DocumentApi(Resource):
     def get(self, docid):
-        try:
-            doc = Document.query.one(docid)
-        except Exception as exec:
-            logging.error(f'Error querying database: {exec}')
-            return Response({'error': str(exec)})
+        doc = db.one_or_404(
+            db.select(Document).filter_by(docid=docid),
+            description=f'Error 404: no record of document with id {docid}',
+        )
+        return doc.data()
 
-        return doc
+    def delete(self, docid):
+        doc = db.one_or_404(
+            db.select(Document).filter_by(docid=docid),
+            description=f'Error 404: no record of document with id {docid}',
+        )
+        db.session.delete(doc)
+        db.session.commit()
 
-
+        return Response({}, status=204)

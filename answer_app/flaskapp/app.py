@@ -10,7 +10,7 @@ from flaskapp.config import app, db
 
 api = Api(app)
 api.add_resource(DocumentsApi, '/documents')
-api.add_resource(DocumentApi, '/documents/{docid}')
+api.add_resource(DocumentApi, '/documents/<string:docid>')
 
 
 def initapp():
