@@ -4,13 +4,14 @@ from argparse import ArgumentParser
 
 from flask_restful import Api
 
-from flaskapp.resources import DocumentsApi, DocumentApi
+from flaskapp.resources import DocumentsApi, DocumentApi, ConversationsApi
 from flaskapp.config import app, db
 
 
 api = Api(app)
 api.add_resource(DocumentsApi, '/documents')
 api.add_resource(DocumentApi, '/documents/<string:docid>')
+api.add_resource(ConversationsApi, '/conversations')
 
 
 def initapp():

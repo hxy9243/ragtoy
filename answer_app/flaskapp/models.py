@@ -1,16 +1,24 @@
 import uuid
 
+from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey
+
 from flaskapp.config import db
 
 
 class Document(db.Model):
     __tablename__ = 'documents'
-    docid = db.Column('id', db.String(16),
-                      default=str(uuid.uuid4()), primary_key=True)
+    docid = db.Column('id', db.String(16), primary_key=True)
     doctype = db.Column('type', db.String(16), default='text')
     hash = db.Column('hash', db.String(64))
     body = db.Column('body', db.Text)
     vectorid = db.Column('vector', db.String(64))
+
+    conversations = relationship(
+        'Conversation',
+        cascade="all, delete-orphan",
+        back_populates='doc',
+    )
 
     def __repr__(self):
         return f'<Document {self.docid}>'
@@ -26,11 +34,25 @@ class Document(db.Model):
 class Conversation(db.Model):
     __tablename__ = 'conversations'
     convid = db.Column('id', db.String(16), primary_key=True)
-    docid = db.Column('docid', db.String(16), nullable=False)
+    docid = db.Column('docid', db.String(16),
+                      ForeignKey(Document.docid),
+                      nullable=False,
+                      )
     user = db.Column('user', db.String(16))
+
+    doc = relationship(
+        'Document', back_populates='conversations',
+    )
 
     def __repr__(self):
         return f'<Conversation {self.convid}>'
+
+    def data(self):
+        return {
+            'id': self.convid,
+            'docid': self.docid,
+            'user': self.user,
+        }
 
 
 class Message(db.Model):
