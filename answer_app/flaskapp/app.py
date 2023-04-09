@@ -5,7 +5,8 @@ from argparse import ArgumentParser
 from flask_restful import Api
 
 from flaskapp.resources import (
-    DocumentsApi, DocumentApi, ConversationsApi, ConversationApi,
+    DocumentsApi, DocumentApi, DocumentConversationsApi,
+    ConversationsApi, ConversationApi,
     MessagesApi,
 )
 from flaskapp.config import app, db
@@ -14,6 +15,8 @@ from flaskapp.config import app, db
 api = Api(app)
 api.add_resource(DocumentsApi, '/documents')
 api.add_resource(DocumentApi, '/documents/<string:docid>')
+api.add_resource(DocumentConversationsApi,
+                 '/documents/<string:docid>/conversations')
 api.add_resource(ConversationsApi, '/conversations')
 api.add_resource(ConversationApi, '/conversations/<string:convid>')
 api.add_resource(MessagesApi, '/conversations/<string:convid>/messages')

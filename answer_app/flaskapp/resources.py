@@ -40,6 +40,7 @@ class DocumentsApi(Resource):
         if existing:
             return make_response(existing[0].data())
 
+
         newdoc = Document(
             docid=str(uuid.uuid4()),
             doctype=doctype,
@@ -76,6 +77,19 @@ class DocumentApi(Resource):
         db.session.commit()
 
         return make_response({}, status=204)
+
+
+class DocumentConversationsApi(Resource):
+    def get(self, docid):
+        convs = db.session.execute(
+            db.select(Conversation).
+            where(Conversation.docid == docid),
+            ).scalars()
+
+        results = []
+        for conv in convs:
+            results.append(conv.data())
+        return results
 
 
 class ConversationsApi(Resource):
@@ -137,10 +151,7 @@ class MessagesApi(Resource):
             results.append(m.data())
         return results
 
-    def post(self, convid):
-        msgtext = request.form['message']
-        msgtype = request.form['message-type']
-
+    def _add_message(self, convid, msgtype, msgtext):
         with db.session.begin():
             conv = db.one_or_404(
                 db.select(Conversation).
@@ -167,5 +178,12 @@ class MessagesApi(Resource):
             )
 
             db.session.add(msg)
+        return msg
+
+    def post(self, convid):
+        msgtype = request.form['message-type']
+        msgtext = request.form['message']
+
+        msg = self._add_message(convid, msgtext, msgtype)
 
         return msg.data()
