@@ -24,7 +24,7 @@ class VectorIndices:
         return VectorIndex(self.conn, idx)
 
     def create(self, idx, embedding_size=GPT3_EMBEDDING_SIZE):
-        vi = VectorIndex(self.conn, idx, embedding_size)
+        vi = VectorIndex(self.conn, idx)
         vi.create_index(embedding_size)
 
         return vi
