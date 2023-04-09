@@ -7,7 +7,9 @@ from flask_restful import Resource
 from flask import make_response, request
 
 from flaskapp.models import Document, Conversation, Message
-from flaskapp.config import db
+from flaskapp.vector import EmbeddingInfo
+from flaskapp.llm import Chunkifier
+from flaskapp.config import db, llm, vectorindices
 
 
 class DocumentsApi(Resource):
@@ -27,25 +29,58 @@ class DocumentsApi(Resource):
     def _get_hash(self, body):
         return hashlib.md5(body.encode('utf-8')).hexdigest()
 
-    def post(self):
-        body = request.form['document']
-        doctype = request.form['type']
-
+    def _get_existing(self, body):
         existing = db.session.execute(
             db.select(Document).where(
                 Document.hash == self._get_hash(body)
             ),
         ).scalars().all()
 
-        if existing:
+        return existing
+
+    def _create_embedding(self, docid, vectoridx, body):
+        chunks = Chunkifier().process(body)
+        ntokens = 0
+        for i, chunk in enumerate(chunks):
+            body, ntoken = chunk
+
+            logging.info(f'creating #{i+1}/{len(chunks)} for doc {docid} ' +
+                         f'{ntoken} tokens...')
+            embedding = llm.create_embedding(body)
+            ntokens += ntoken
+
+            vectoridx.put(EmbeddingInfo(
+                key='text-' + str(i),
+                text=body,
+                ntokens=ntoken,
+                embedding=embedding,
+            ))
+
+        return ntokens
+
+    def post(self):
+        body = request.form['document']
+        doctype = request.form['type']
+
+        # check if the text is already uploaded, based on hash
+        existing = self._get_existing(body)
+        if len(existing) != 0:
             return make_response(existing[0].data())
 
+        docid = str(uuid.uuid4())
+
+        # create embedding for the document
+        logging.info(f'creating embedding for document {docid}: {body[:32]}..')
+        vectoridx = vectorindices.create(docid)
+
+        ntokens = self._create_embedding(docid, vectoridx, body)
 
         newdoc = Document(
-            docid=str(uuid.uuid4()),
+            docid=docid,
             doctype=doctype,
             hash=self._get_hash(body),
             body=body,
+            ntokens=ntokens,
         )
         db.session.add(newdoc)
         db.session.commit()
@@ -69,6 +104,8 @@ class DocumentApi(Resource):
         return docdata
 
     def delete(self, docid):
+        # delete corresponding embedding as well
+
         doc = db.one_or_404(
             db.select(Document).where(Document.docid == docid),
             description=f'Error 404: no record of document with id {docid}',
@@ -96,11 +133,7 @@ class ConversationsApi(Resource):
     def get(self):
         convs = db.session.execute(db.select(Conversation)).scalars()
 
-        results = []
-        for conv in convs:
-            results.append(conv.data())
-
-        return results
+        return [conv.data() for conv in convs]
 
     def post(self):
         user = request.form['user']
@@ -185,5 +218,11 @@ class MessagesApi(Resource):
         msgtext = request.form['message']
 
         msg = self._add_message(convid, msgtext, msgtype)
+
+        # create emebedding for the message
+
+        # query context
+
+        # query QA engine for answer
 
         return msg.data()

@@ -21,6 +21,10 @@ api.add_resource(ConversationsApi, '/conversations')
 api.add_resource(ConversationApi, '/conversations/<string:convid>')
 api.add_resource(MessagesApi, '/conversations/<string:convid>/messages')
 
+logging.basicConfig(encoding='utf-8', level=logging.DEBUG)
+handler = logging.StreamHandler(sys.stdout)
+app.logger.addHandler(handler)
+
 
 def initapp():
     with app.app_context():
