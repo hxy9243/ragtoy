@@ -10,7 +10,7 @@ class Document(db.Model):
     doctype = db.Column('type', db.String(16), default='text')
     hash = db.Column('hash', db.String(64))
     body = db.Column('body', db.Text)
-    vectorid = db.Column('vector', db.String(64))
+    ntokens = db.Column('ntokens', db.Integer)
 
     conversations = relationship(
         'Conversation',
