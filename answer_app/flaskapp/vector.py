@@ -1,6 +1,8 @@
+from dataclasses import dataclass
+
 import redis
 from redis.commands.search.field import (
-    VectorField, TagField, TextField
+    VectorField, TagField, NumericField, TextField
 )
 from redis.commands.search.query import Query
 
@@ -28,6 +30,15 @@ class VectorIndices:
         return vi
 
 
+@dataclass
+class EmbeddingInfo():
+    key: str = ''
+    tag: str = ''
+    ntokens: int = 0
+    text: str = ''
+    embedding: np.ndarray = None
+
+
 class VectorIndex:
     def __init__(self,
                  conn,
@@ -46,6 +57,7 @@ class VectorIndex:
                             "DISTANCE_METRIC": 'cosine',
                         }),
             TagField('tag'),
+            NumericField('ntokens'),
             TextField('text'),
         ]
         self.conn.ft(self.index).create_index(schema)
@@ -56,26 +68,41 @@ class VectorIndex:
     def drop_index(self):
         self.conn.ft(self.index).dropindex(delete_documents=True)
 
-    def put(self, key, tag, text, embedding):
-        self.conn.hset(key, mapping={
-            'embedding': embedding.tobytes(),
-            'tag': tag,
-            'text': text,
-        })
-        pass
+    def put(self, embedding: EmbeddingInfo):
+        if embedding.key == '':
+            raise ValueError('Error: embedding has no key')
 
-    def get(self, key, field):
+        self.conn.hset(embedding.key, mapping={
+            'embedding': embedding.embedding.tobytes(),
+            'tag': embedding.tag,
+            'ntokens': embedding.ntokens,
+            'text': embedding.text,
+        })
+
+    def getdata(self, key, field):
         return self.conn.hget(key, field)
 
     def get_tag(self, key):
-        return self.get(key, 'tag').decode('utf-8')
+        return self.getdata(key, 'tag').decode('utf-8')
 
     def get_text(self, key):
-        return self.get(key, 'text').decode('utf-8')
+        return self.getdata(key, 'text').decode('utf-8')
+
+    def get_ntokens(self, key):
+        return int(self.getdata(key, 'ntokens'))
 
     def get_embedding(self, key):
-        data = self.get(key, 'embedding')
+        data = self.getdata(key, 'embedding')
         return np.frombuffer(data, dtype=np.float32)
+
+    def get(self, key):
+        return EmbeddingInfo(
+            key=key,
+            tag=self.get_tag(key),
+            text=self.get_text(key),
+            ntokens=self.get_ntokens(key),
+            embedding=self.get_embedding(key),
+        )
 
     def search(self, vector, max=5):
         querystr = f'*=>[KNN {max} @embedding $vector AS vector_score]'
@@ -90,7 +117,6 @@ class VectorIndex:
 
         ret = []
         for r in results.docs:
-            print(r.id)
             ret.append({
                 'key': r.id,
                 'vector_score': r.vector_score,

@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-from vector import VectorIndices
+from flaskapp.vector import EmbeddingInfo, VectorIndices
 
 TEST_EMBEDDING_SIZE = 8
 
@@ -36,7 +36,13 @@ def test_putvector(vector_index):
 
     for i in range(10):
         data = vectors[i]
-        vector_index.put(i, 'text-'+str(i), 'example random text', data)
+        vector_index.put(EmbeddingInfo(
+            key=str(i),
+            tag='text-'+str(i),
+            text='example random text',
+            ntokens=3,
+            embedding=data),
+        )
 
     # test get textid
     textid = vector_index.get_tag(1)
@@ -58,7 +64,6 @@ def test_searchvector(vector_index):
     scores = []
 
     for r in results:
-        print(r)
         embedding = vector_index.get_embedding(r['key'])
         score = cosine(search_vector, embedding)
         scores.append(score)
