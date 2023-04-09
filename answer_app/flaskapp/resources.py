@@ -8,7 +8,7 @@ from flask import make_response, request
 
 from flaskapp.models import Document, Conversation, Message
 from flaskapp.vector import EmbeddingInfo
-from flaskapp.llm import Chunkifier
+from flaskapp.nlp import Chunkifier
 from flaskapp.config import db, llm, vectorindices
 
 
@@ -50,7 +50,7 @@ class DocumentsApi(Resource):
             ntokens += ntoken
 
             vectoridx.put(EmbeddingInfo(
-                key='text-' + str(i),
+                key=docid + '-' + str(i),
                 text=body,
                 ntokens=ntoken,
                 embedding=embedding,
@@ -59,8 +59,9 @@ class DocumentsApi(Resource):
         return ntokens
 
     def post(self):
-        body = request.form['document']
-        doctype = request.form['type']
+        req = request.get_json()
+        body = req['document']
+        doctype = req['type']
 
         # check if the text is already uploaded, based on hash
         existing = self._get_existing(body)

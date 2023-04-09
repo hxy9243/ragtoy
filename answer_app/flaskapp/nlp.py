@@ -2,6 +2,9 @@
 creating embedding, creating context, queries GPT endpoint
 '''
 
+import time
+import logging
+
 import pandas as pd
 import numpy as np
 from spacy.lang.en import English
@@ -96,14 +99,27 @@ class Chunkifier:
 
 
 class LLM:
+    RETRIES = 10
 
-    def __init__(self):
-        pass
+    def __init__(self, api_key):
+        openai.api_key = api_key
 
     def create_embedding(self, text):
+        for _ in range(LLM.RETRIES):
+            try:
+                logging.info('Calling openAI embedding API...')
+                embedding = openai.Embedding.create(
+                    input=[text], model=EMBEDDING_MODEL,
+                )['data'][0]['embedding']
+            except openai.error.RateLimitError:
+                logging.warn('Error: hit rate limiter, retrying...')
+                time.sleep(10)
+            except Exception:
+                raise Exception
+            else:
+                break
 
-        pass
+        return np.array(embedding)
 
     def create_completion(self, text):
-
         pass
