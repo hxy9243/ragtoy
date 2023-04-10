@@ -4,7 +4,9 @@ import numpy as np
 
 from flaskapp.vector import EmbeddingInfo, VectorIndices
 
-TEST_EMBEDDING_SIZE = 8
+TESTIDX = 'testidx'
+
+TEST_EMBEDDING_SIZE = 2048
 
 
 def _create_random_vectors():
@@ -24,7 +26,7 @@ def cosine(v1, v2):
 def vector_index():
     indices = VectorIndices()
 
-    return indices.get('testidx')
+    return indices.get(TESTIDX)
 
 
 def test_initindex(vector_index):
@@ -37,7 +39,7 @@ def test_putvector(vector_index):
     for i in range(10):
         data = vectors[i]
         vector_index.put(EmbeddingInfo(
-            key=str(i),
+            key=TESTIDX + ':' + str(i),
             tag='text-'+str(i),
             text='example random text',
             ntokens=3,
@@ -51,7 +53,7 @@ def test_putvector(vector_index):
 
     # test get embedding
     for i in range(10):
-        embedding = vector_index.get_embedding(i)
+        embedding = vector_index.get_embedding(TESTIDX + ':' + str(i))
 
         assert np.array_equal(embedding, vectors[i]), \
             f'Error, getting unexpected embedding value at index {i}'
@@ -63,14 +65,15 @@ def test_searchvector(vector_index):
     results = vector_index.search(search_vector, max=10)
     scores = []
 
+    assert len(results) != 0, 'No search results'
+
     for r in results:
         embedding = vector_index.get_embedding(r['key'])
         score = cosine(search_vector, embedding)
         scores.append(score)
 
-    # embedding is sorted by highest score
-    scores.reverse()
-    assert scores == sorted(scores), 'Search result not sorted'
+    # cosine embedding is sorted by highest score, with max sorted as top
+    assert scores == sorted(scores, reverse=True), 'Search result not sorted'
 
 
 def test_cleanup(vector_index):

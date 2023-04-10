@@ -1,14 +1,16 @@
+import logging
 from dataclasses import dataclass
 
 import redis
 from redis.commands.search.field import (
     VectorField, TagField, NumericField, TextField
 )
+from redis.commands.search.indexDefinition import IndexDefinition
 from redis.commands.search.query import Query
 
 import numpy as np
 
-GPT3_EMBEDDING_SIZE = 2048
+from flaskapp.nlp import GPT3_EMBEDDING_SIZE
 
 
 class VectorIndices:
@@ -60,7 +62,10 @@ class VectorIndex:
             NumericField('ntokens'),
             TextField('text'),
         ]
-        self.conn.ft(self.index).create_index(schema)
+        self.conn.ft(self.index).create_index(
+            schema,
+            definition=IndexDefinition(prefix=[self.index+':'])
+        )
 
     def info(self):
         self.conn.ft(self.index).info()
@@ -105,6 +110,8 @@ class VectorIndex:
         )
 
     def search(self, vector, max=5):
+        logging.debug(f'searching for similiar vector with index {self.index}')
+
         querystr = f'*=>[KNN {max} @embedding $vector AS vector_score]'
         query = Query(querystr).return_fields(
             'vector_score', 'embedding', 'tag', 'text',
