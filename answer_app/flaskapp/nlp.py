@@ -19,9 +19,13 @@ EMBEDDING_MODEL = 'text-embedding-ada-002'
 
 COMPLETION_MODEL = 'text-davinci-003'
 
+GPT3_EMBEDDING_SIZE = 1536
+
 MAX_CHUNK_TOKENS = 256
 
 MIN_PARAGRAPH_SIZE = 32
+
+MAX_COMPLETION_TOKENS = 1024
 
 
 class Chunkifier:
@@ -31,7 +35,7 @@ class Chunkifier:
     def __init__(self,
                  max_chunktokens=MAX_CHUNK_TOKENS,
                  min_paragraphsize=MIN_PARAGRAPH_SIZE,
-                ):
+                 ):
         self.nlp = English()
         self.nlp.add_pipe('sentencizer')
         self.max_chunktokens = max_chunktokens
@@ -119,7 +123,35 @@ class LLM:
             else:
                 break
 
-        return np.array(embedding)
+        logging.debug(f'Returning API embedding size of {len(embedding)}')
+        return np.array(embedding).astype(np.float32)
 
-    def create_completion(self, text):
-        pass
+    def create_completion(self, prompt,
+                          model=COMPLETION_MODEL,
+                          max_tokens=MAX_COMPLETION_TOKENS,
+                          temperature=0,
+                          frequency_penalty=0,
+                          presence_penalty=0,
+                          ):
+        for _ in range(LLM.RETRIES):
+            try:
+                logging.info('Calling openAI embedding API...')
+                response = openai.Completion.create(
+                    prompt=prompt,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    top_p=1,
+                    frequency_penalty=frequency_penalty,
+                    presence_penalty=presence_penalty,
+                    stop=None,
+                    model=model,
+                )
+            except openai.error.RateLimitError:
+                logging.warn('Error: hit rate limiter, retrying...')
+                time.sleep(10)
+            except Exception:
+                raise Exception
+            else:
+                break
+
+        return response['choices'][0]['text'].strip()
