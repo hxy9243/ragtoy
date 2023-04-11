@@ -1,50 +1,58 @@
-ChatGPT Toys
-========
+Chat Toy
+====
 
-This is a toy Python project to learn and explore the capabilities of openAI ChatGPT API.
+# Summary
 
-# Project Setup
+A toy application to ask questions about a document from the user, based on
+OpenAI ChatGPT API.
 
-Project requires your openAI key in `.env` file:
+Currently under construction. Please stay tuned!
 
-```
-OPENAI_API_KEY=sk-example-key
-```
+# Demo
 
-# Examples
+For a local demo run
 
-## Wikipedia Q & A machine. [examples/wiki_qa.py](examples/wiki_qa.py)
+1. Prepare for environment
 
-Usage:
+   Install dependencies from `requirements.txt`.
+   And go into `src/flaskapp` directory, creates `.env` environment file
+   with your openAI token:
 
-```
-cd examples
-python3 wiki_qa.py
+    ```
+    OPENAI_API_KEY=sk-xxxx
+    ```
 
-## Enter your question based in input.
-```
+2. Starts redis server
 
-Update `WIKI_PAGE` constant to get more info on different pages and topics.
+   ```
+   docker run -d --restart=always -p 6379:6379 -p 8000:8000 redis-stack-server
+   ```
 
-Example output:
+   See:
 
-```
-Question: What was Turing test and how did Alan describe it?
+   - <https://redis.io/docs/stack/>
+   - <https://redis.io/docs/stack/get-started/install/docker/>
 
-Calling openAI completion API...
-Prompt:  Answer the question based on the context, and if it cannot be answered based on the context, say "I don't know"
-Context:
-Figure adapted from Saygin, 2000.[7] Saul Traiger argues that there are at least three primary versions of the Turing test, two of which are offered in "Computing Machinery and Intelligence" and one that he describes as the "Standard Interpretation".[55] While there is some debate regarding whether the "Standard Interpretation"
+2. Start Flask app server
 
-...
+    ```
+    flask run
+    ```
 
-====================
+3. Queries API interface
 
+   See definition in [app.py](src/flaskapp/app.py).
 
-openAI answer: Turing test was a test of indistinguishability in performance capacity, where an interrogator would ask questions of a machine and a human in order to determine which was which. Alan Turing described it as a three-person game involving an interrogator asking questions of a man and a woman in another room in order to determine the correct sex of the two players.
+   (Documentation to come soon...)
 
+   e.g.:
 
-====================
-```
+   ```
+   curl -XPOST -H 'content-type=application/json' -d @data.json localhost:5000/documents
+   ```
 
-Update `WIKI_PAGE` constant to get more info on different pages and topics.
+   data.json:
+
+   ```
+   {"document": "example text here.", "type": "text"}
+   ```
