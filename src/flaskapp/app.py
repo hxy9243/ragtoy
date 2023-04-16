@@ -3,6 +3,7 @@ import logging
 from argparse import ArgumentParser
 
 from flask_restful import Api
+from flask import Blueprint
 
 from flaskapp.resources import (
     DocumentsApi, DocumentApi, DocumentConversationsApi,
@@ -11,8 +12,8 @@ from flaskapp.resources import (
 )
 from flaskapp.config import app, db
 
-
-api = Api(app)
+apibp = Blueprint('api', __name__)
+api = Api(apibp)
 api.add_resource(DocumentsApi, '/documents')
 api.add_resource(DocumentApi, '/documents/<string:docid>')
 api.add_resource(DocumentConversationsApi,
@@ -20,6 +21,8 @@ api.add_resource(DocumentConversationsApi,
 api.add_resource(ConversationsApi, '/conversations')
 api.add_resource(ConversationApi, '/conversations/<string:convid>')
 api.add_resource(MessagesApi, '/conversations/<string:convid>/messages')
+
+app.register_blueprint(apibp, url_prefix='/api')
 
 logging.basicConfig(encoding='utf-8', level=logging.DEBUG)
 handler = logging.StreamHandler(sys.stdout)
