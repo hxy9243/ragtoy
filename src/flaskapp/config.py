@@ -15,4 +15,4 @@ load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')
 llm = LLM(api_key=api_key)
 
-vectorindices = VectorIndices()
+vectorindices = VectorIndices('localhost', 6379)
