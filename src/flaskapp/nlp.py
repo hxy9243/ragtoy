@@ -21,7 +21,7 @@ GPT3_EMBEDDING_SIZE = 1536
 
 MAX_CHUNK_TOKENS = 256
 
-MIN_PARAGRAPH_SIZE = 32
+MIN_PARAGRAPH_LEN = 80
 
 MAX_COMPLETION_TOKENS = 1024
 
@@ -32,12 +32,12 @@ class Chunkifier:
 
     def __init__(self,
                  max_chunktokens=MAX_CHUNK_TOKENS,
-                 min_paragraphsize=MIN_PARAGRAPH_SIZE,
+                 min_paragraphlen=MIN_PARAGRAPH_LEN,
                  ):
         self.nlp = MultiLanguage()
         self.nlp.add_pipe('sentencizer')
         self.max_chunktokens = max_chunktokens
-        self.min_paragraphsize = min_paragraphsize
+        self.min_paragraphlen = min_paragraphlen
 
     def _preprocess(self, serie):
         serie = serie.replace('\n', ' ')
@@ -61,19 +61,17 @@ class Chunkifier:
         tokens_so_far = 0
         chunk = []
 
-        for i, sentence_token in enumerate(zip(sentences, n_tokens)):
-            sentence, n = sentence_token
-
-            tokens_so_far += n
-
-            if n + tokens_so_far > self.max_chunktokens or \
-               i == len(sentences) - 1:
-
+        for sentence, n in zip(sentences, n_tokens):
+            if n + tokens_so_far >= self.max_chunktokens and chunk:
                 chunks.append((' '.join(chunk), tokens_so_far))
                 tokens_so_far = 0
                 chunk = []
 
             chunk.append(sentence)
+            tokens_so_far += n
+
+        if chunk:
+            chunks.append((' '.join(chunk), tokens_so_far))
 
         return chunks
 
@@ -86,8 +84,8 @@ class Chunkifier:
         for i, p in enumerate(paragraphs):
             existing_ps.append(p)
 
-            # donnot split if paragraph is too small
-            if len(p) < self.min_paragraphsize and i < len(paragraphs)-1:
+            # do not split if paragraph is too small
+            if len(p) < self.min_paragraphlen and i < len(paragraphs)-1:
                 continue
 
             chunktext = '\n'.join(existing_ps)
