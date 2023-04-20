@@ -5,12 +5,10 @@ creating embedding, creating context, queries GPT endpoint
 import time
 import logging
 
-import pandas as pd
 import numpy as np
 from spacy.lang.en import English
 import tiktoken
 import openai
-from openai.embeddings_utils import distances_from_embeddings
 
 
 TOKEN_MODEL = 'cl100k_base'
