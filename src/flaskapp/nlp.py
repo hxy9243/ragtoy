@@ -6,7 +6,7 @@ import time
 import logging
 
 import numpy as np
-from spacy.lang.en import English
+from spacy.lang.xx import MultiLanguage
 import tiktoken
 import openai
 
@@ -34,7 +34,7 @@ class Chunkifier:
                  max_chunktokens=MAX_CHUNK_TOKENS,
                  min_paragraphsize=MIN_PARAGRAPH_SIZE,
                  ):
-        self.nlp = English()
+        self.nlp = MultiLanguage()
         self.nlp.add_pipe('sentencizer')
         self.max_chunktokens = max_chunktokens
         self.min_paragraphsize = min_paragraphsize
