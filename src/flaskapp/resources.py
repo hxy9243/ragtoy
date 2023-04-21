@@ -8,7 +8,7 @@ from flask import make_response, request
 
 from flaskapp.models import Document, Conversation, Message
 from flaskapp.vector import EmbeddingInfo
-from flaskapp.nlp import Chunkifier
+from flaskapp.nlp import Preprocessor
 from flaskapp.config import db, llm, vectorindices
 
 
@@ -41,7 +41,7 @@ class DocumentsApi(Resource):
     def _create_embedding(self, docid, body):
         vectoridx = vectorindices.create(docid)
 
-        chunks = Chunkifier().process(body)
+        chunks = Preprocessor().chunkify(body)
         ntokens = 0
         for i, chunk in enumerate(chunks):
             body, ntoken = chunk

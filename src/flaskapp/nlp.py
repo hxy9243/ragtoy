@@ -6,7 +6,9 @@ import time
 import logging
 
 import numpy as np
-from spacy.lang.xx import MultiLanguage
+import spacy
+from spacy.language import Language
+from spacy_langdetect import LanguageDetector
 import tiktoken
 import openai
 
@@ -21,12 +23,12 @@ GPT3_EMBEDDING_SIZE = 1536
 
 MAX_CHUNK_TOKENS = 256
 
-MIN_PARAGRAPH_LEN = 80
+MIN_PARAGRAPH_LEN = 1024
 
 MAX_COMPLETION_TOKENS = 1024
 
 
-class Chunkifier:
+class Preprocessor:
     '''creating chunks for documentation
     '''
 
@@ -34,12 +36,11 @@ class Chunkifier:
                  max_chunktokens=MAX_CHUNK_TOKENS,
                  min_paragraphlen=MIN_PARAGRAPH_LEN,
                  ):
-        self.nlp = MultiLanguage()
-        self.nlp.add_pipe('sentencizer')
+
         self.max_chunktokens = max_chunktokens
         self.min_paragraphlen = min_paragraphlen
 
-    def _preprocess(self, serie):
+    def _remove_empty_chars(self, serie):
         serie = serie.replace('\n', ' ')
         serie = serie.replace('\\n', ' ')
         serie = serie.replace('  ', ' ')
@@ -47,8 +48,47 @@ class Chunkifier:
 
         return serie
 
-    def create_chunks(self, text):
-        doc = self.nlp(text)
+    def get_lang(self, text):
+        @Language.factory("language_detector")
+        def get_lang_detector(nlp, name):
+            return LanguageDetector()
+
+        detector = spacy.load("en_core_web_sm")
+        detector.add_pipe('language_detector', last=True)
+        return detector(text[:64])._.language['language']
+
+    def get_spacy_model(self, lang):
+        if lang == 'zh-cn' or lang == 'zh-tw':
+            from spacy.lang.zh import Chinese
+            return Chinese()
+        elif lang == 'en':
+            from spacy.lang.en import English
+            return English()
+        elif lang == 'jp':
+            from spacy.lang.ja import Japanese
+            return Japanese()
+        elif lang == 'ko':
+            from spacy.lang.ko import Korean
+            return Korean()
+        elif lang == 'es':
+            from spacy.lang.es import Spanish
+            return Spanish()
+        elif lang == 'de':
+            from spacy.lang.de import German
+            return German()
+        elif lang == 'fr':
+            from spacy.lang.fr import French
+            return French()
+        else:
+            print('loading english')
+            from spacy.lang.en import English
+            return English()
+
+    def _create_chunks(self, text):
+        nlp = self.get_spacy_model(lang=self.get_lang(text))
+        nlp.add_pipe('sentencizer')
+
+        doc = nlp(text)
         sentences = [sent.text for sent in doc.sents]
 
         tokenizer = tiktoken.get_encoding(TOKEN_MODEL)
@@ -75,7 +115,7 @@ class Chunkifier:
 
         return chunks
 
-    def process(self, text):
+    def chunkify(self, text):
         chunks = []
         existing_ps = []
 
@@ -89,9 +129,9 @@ class Chunkifier:
                 continue
 
             chunktext = '\n'.join(existing_ps)
-            chunktext = self._preprocess(chunktext)
+            chunktext = self._remove_empty_chars(chunktext)
 
-            cs = self.create_chunks(chunktext)
+            cs = self._create_chunks(chunktext)
             chunks += cs
             existing_ps = []
 
