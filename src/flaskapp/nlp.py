@@ -32,14 +32,6 @@ class Preprocessor:
     '''creating chunks for documentation
     '''
 
-    def __init__(self,
-                 max_chunktokens=MAX_CHUNK_TOKENS,
-                 min_paragraphlen=MIN_PARAGRAPH_LEN,
-                 ):
-
-        self.max_chunktokens = max_chunktokens
-        self.min_paragraphlen = min_paragraphlen
-
     def _remove_empty_chars(self, serie):
         serie = serie.replace('\n', ' ')
         serie = serie.replace('\\n', ' ')
@@ -64,7 +56,7 @@ class Preprocessor:
         elif lang == 'en':
             from spacy.lang.en import English
             return English()
-        elif lang == 'jp':
+        elif lang == 'ja':
             from spacy.lang.ja import Japanese
             return Japanese()
         elif lang == 'ko':
@@ -80,17 +72,18 @@ class Preprocessor:
             from spacy.lang.fr import French
             return French()
         else:
-            print('loading english')
             from spacy.lang.en import English
             return English()
 
-    def _create_chunks(self, text):
+    def _split_sentences(self, text):
         nlp = self.get_spacy_model(lang=self.get_lang(text))
         nlp.add_pipe('sentencizer')
 
         doc = nlp(text)
-        sentences = [sent.text for sent in doc.sents]
+        return [sent.text for sent in doc.sents]
 
+    def _group_chunks(self, sentences,
+                      max_chunktokens=MAX_CHUNK_TOKENS,):
         tokenizer = tiktoken.get_encoding(TOKEN_MODEL)
 
         # Get the number of tokens for each sentence
@@ -102,7 +95,7 @@ class Preprocessor:
         chunk = []
 
         for sentence, n in zip(sentences, n_tokens):
-            if n + tokens_so_far >= self.max_chunktokens and chunk:
+            if n + tokens_so_far >= max_chunktokens and chunk:
                 chunks.append((' '.join(chunk), tokens_so_far))
                 tokens_so_far = 0
                 chunk = []
@@ -115,7 +108,9 @@ class Preprocessor:
 
         return chunks
 
-    def chunkify(self, text):
+    def chunkify(self, text,
+                 max_chunktokens=MAX_CHUNK_TOKENS,
+                 min_paragraphlen=MIN_PARAGRAPH_LEN):
         chunks = []
         existing_ps = []
 
@@ -125,13 +120,16 @@ class Preprocessor:
             existing_ps.append(p)
 
             # do not split if paragraph is too small
-            if len(p) < self.min_paragraphlen and i < len(paragraphs)-1:
+            if len(p) < min_paragraphlen and i < len(paragraphs)-1:
                 continue
 
             chunktext = '\n'.join(existing_ps)
             chunktext = self._remove_empty_chars(chunktext)
 
-            cs = self._create_chunks(chunktext)
+            sentences = self._split_sentences(chunktext)
+
+            cs = self._group_chunks(sentences,
+                                    max_chunktokens=max_chunktokens)
             chunks += cs
             existing_ps = []
 
