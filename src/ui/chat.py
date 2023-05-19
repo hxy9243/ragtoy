@@ -38,4 +38,3 @@ class ChatComponent:
             [self.textinput, self.chatbot],
             [self.textinput, self.chatbot],
         )
-

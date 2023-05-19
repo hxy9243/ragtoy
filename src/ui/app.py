@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import gradio as gr
 from gradio.blocks import BlockContext
 
@@ -7,15 +6,17 @@ from ui.chat import ChatComponent
 from ui.setting import SettingComponent
 
 
-@dataclass
-class App():
+class GradioApp():
     document: BlockContext
     chat: BlockContext
     setting: BlockContext
 
-    def render(self):
-        with gr.Blocks() as demo:
+    def launch(self, *args, **kwargs):
+        self.document = DocumentComponent()
+        self.chat = ChatComponent()
+        self.setting = SettingComponent()
 
+        with gr.Blocks() as demo:
             with gr.Tab('Chat'):
                 with gr.Accordion('Documents'):
                     self.document.render()
@@ -27,14 +28,8 @@ class App():
 
             self.chat.run()
 
-            return demo
+            self.document.run()
+
+            demo.launch(*args, **kwargs)
 
 
-app = App(
-    document=DocumentComponent(),
-    chat=ChatComponent(),
-    setting=SettingComponent(),
-)
-demo = app.render()
-
-demo.launch(server_name='0.0.0.0')
