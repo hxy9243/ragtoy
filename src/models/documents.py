@@ -17,11 +17,11 @@ class Document(Base):
     body = Column('body', Text)
     ntokens = Column('ntokens', Integer)
 
-    conversations = relationship(
-        'Conversation',
-        cascade="all, delete-orphan",
-        back_populates='doc',
-    )
+    # conversations = relationship(
+    #     'Conversation',
+    #     cascade="all, delete-orphan",
+    #     back_populates='doc',
+    # )
 
     def __repr__(self):
         return f'<Document {self.docid}>'
@@ -37,7 +37,7 @@ class Document(Base):
 
 class DocumentsApi:
     def get(self):
-        docs = session.execute(session.select(Document)).scalars()
+        docs = session.execute(session.query(Document)).scalars()
         results = []
         for doc in docs:
             results.append(doc.data())
@@ -49,7 +49,7 @@ class DocumentsApi:
 
     def _get_existing(self, body):
         existing = session.execute(
-            session.select(Document).where(
+            session.query(Document).where(
                 Document.hash == self._get_hash(body)
             ),
         ).scalars().all()
@@ -93,7 +93,7 @@ class DocumentsApi:
 
         # create embedding for the document and saves in the vector db
         logging.info(f'creating embedding for document {docid}: {document[:32]}..')
-        ntokens = self._create_embedding(docid, document)
+        # ntokens = self._create_embedding(docid, document)
 
         newdoc = Document(
             name=name,
@@ -101,7 +101,7 @@ class DocumentsApi:
             doctype=doctype,
             hash=self._get_hash(document),
             body=document,
-            ntokens=ntokens,
+            # ntokens=ntokens,
         )
         session.add(newdoc)
         session.commit()

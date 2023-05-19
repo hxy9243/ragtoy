@@ -56,6 +56,9 @@ class DocumentComponent:
 
         logging.info(f'Adding new document {docname}')
 
+        doc = DocumentsApi()
+        doc.post(docname, text)
+
         choices = self.documents.choices
         choices.append(docname)
 
