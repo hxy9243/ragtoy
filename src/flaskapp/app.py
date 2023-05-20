@@ -1,9 +1,6 @@
-import sys
-import logging
-from argparse import ArgumentParser
-
 from flask_restful import Api
 from flask import Blueprint
+from flask_cors import CORS
 
 from flaskapp.resources import (
     DocumentsApi, DocumentApi, DocumentConversationsApi,
@@ -24,9 +21,7 @@ api.add_resource(MessagesApi, '/conversations/<string:convid>/messages')
 
 app.register_blueprint(apibp, url_prefix='/api')
 
-logging.basicConfig(encoding='utf-8', level=logging.DEBUG)
-handler = logging.StreamHandler(sys.stdout)
-app.logger.addHandler(handler)
+CORS(app)
 
 
 def initapp():
@@ -34,25 +29,5 @@ def initapp():
         db.create_all()
 
 
-def runapp():
-    app.run()
-
-
-if __name__ == '__main__':
-    argparser = ArgumentParser(description='Run GptBot application')
-
-    subparsers = argparser.add_subparsers(dest='command')
-    initcmd = subparsers.add_parser('init')
-
-    runcmd = subparsers.add_parser('run')
-
-    args = argparser.parse_args()
-
-    if args.command == 'init':
-        initapp()
-    elif args.command == 'run':
-        runapp()
-    else:
-        argparser.print_help()
-        logging.error('No command specified')
-        sys.exit(1)
+def runapp(*args, **kwargs):
+    app.run(*args, **kwargs)

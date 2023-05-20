@@ -7,6 +7,7 @@ from flaskapp.config import db
 class Document(db.Model):
     __tablename__ = 'documents'
     docid = db.Column('id', db.String(16), primary_key=True)
+    name = db.Column('name', db.String(16), unique=True, nullable=False)
     doctype = db.Column('type', db.String(16), default='text')
     hash = db.Column('hash', db.String(64))
     body = db.Column('body', db.Text)
@@ -23,6 +24,7 @@ class Document(db.Model):
 
     def data(self):
         return {
+            'name': self.name,
             'id': self.docid,
             'body': self.body,
             'type': self.doctype,

@@ -1,20 +1,27 @@
-import os
 import sys
 import logging
+from argparse import ArgumentParser
 
-from ui.app import GradioApp
-from models.base import Base, engine
-
-logging.basicConfig(encoding='utf-8', level=logging.INFO)
-handler = logging.StreamHandler(sys.stdout)
-
-
-if not os.path.exists('/tmp/test.db'):
-    Base.metadata.create_all(engine)
+from flaskapp.app import initapp, runapp
 
 
 def main():
-    GradioApp().launch(server_name='0.0.0.0')
+    argparser = ArgumentParser(description='Run GptBot application')
+
+    subparsers = argparser.add_subparsers(dest='command')
+    subparsers.add_parser('init')
+    subparsers.add_parser('run')
+
+    args = argparser.parse_args()
+
+    if args.command == 'init':
+        initapp()
+    elif args.command == 'run':
+        runapp(debug=True)
+    else:
+        argparser.print_help()
+        logging.error('No command specified')
+        sys.exit(1)
 
 
 if __name__ == '__main__':
