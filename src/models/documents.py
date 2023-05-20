@@ -1,21 +1,25 @@
 import logging
 import hashlib
 import uuid
+from datetime import datetime
 
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, String, Text, Integer
+from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy import Column, String, Text, Integer, DateTime
 
-from models.base import Base, session
+from models.base import Base, engine
 
 
 class Document(Base):
     __tablename__ = 'documents'
     docid = Column('id', String(16), primary_key=True)
-    name = Column('name', String(128))
+    name = Column('name', String(128), unique=True, nullable=False)
     doctype = Column('type', String(16), default='text')
     hash = Column('hash', String(64))
     body = Column('body', Text)
     ntokens = Column('ntokens', Integer)
+    created = Column('created_time', DateTime)
 
     # conversations = relationship(
     #     'Conversation',
@@ -37,7 +41,12 @@ class Document(Base):
 
 class DocumentsApi:
     def get(self):
-        docs = session.execute(session.query(Document)).scalars()
+        session = Session(engine)
+
+        docs = session.execute(
+            select(Document).order_by(Document.created),
+        ).scalars().all()
+
         results = []
         for doc in docs:
             results.append(doc.data())
@@ -47,13 +56,11 @@ class DocumentsApi:
     def _get_hash(self, body):
         return hashlib.md5(body.encode('utf-8')).hexdigest()
 
-    def _get_existing(self, body):
+    def _get_existing(self, session, body):
         existing = session.execute(
-            session.query(Document).where(
-                Document.hash == self._get_hash(body)
-            ),
+            select(Document).filter(
+                Document.hash == self._get_hash(body))
         ).scalars().all()
-
         return existing
 
     # def _create_embedding(self, docid, body):
@@ -84,8 +91,10 @@ class DocumentsApi:
              document,
              doctype='text'):
 
+        session = Session(engine)
+
         # check if the text is already uploaded, based on hash
-        existing = self._get_existing(document)
+        existing = self._get_existing(session, document)
         if len(existing) != 0:
             return []
 
@@ -101,9 +110,29 @@ class DocumentsApi:
             doctype=doctype,
             hash=self._get_hash(document),
             body=document,
+            created=datetime.now(),
             # ntokens=ntokens,
         )
-        session.add(newdoc)
-        session.commit()
+        try:
+            session.add(newdoc)
+            session.commit()
+        except Exception as exec:
+            session.rollback()
+            raise exec
+        else:
+            data = newdoc.data()
 
-        return newdoc.data()
+        return data
+
+    def delete(self, docid):
+        session = Session(engine)
+
+        logging.info(f'deleting docuemnt {docid}..')
+
+        doc = session.execute(
+            select(Document).filter_by(docid=docid),
+        ).scalars().one()
+
+        logging.info(f'deleting docuemnt {doc.docid}, {doc.name}..')
+        session.delete(doc)
+        session.commit()

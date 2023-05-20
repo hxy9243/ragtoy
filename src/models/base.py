@@ -6,5 +6,3 @@ from sqlalchemy.orm import Session
 Base = declarative_base()
 
 engine = create_engine('sqlite:////tmp/test.db')
-
-session = Session(engine)
