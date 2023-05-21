@@ -9,16 +9,13 @@
                                 item-value="id" @update:modelValue="handleSelectDocument"></v-select>
                         </v-row>
                     </v-card-item>
-
                     <v-card-actions>
                         <v-row>
-                            <v-col cols="6">
+                            <v-col>
                                 <v-btn color="red">Delete</v-btn>
                             </v-col>
-                            <v-col cols="6">
-                                <v-btn color="green">Add
-                                    <DocumentAdd :url=this.url @addDocument="handleAddDocument" />
-                                </v-btn>
+                            <v-col>
+                                <DocumentAdd :url=this.url v-model="dialog" @addDocument="handleAddDocument" />
                             </v-col>
                         </v-row>
                     </v-card-actions>
@@ -82,6 +79,9 @@ export default {
             this.documents.push(document);
 
             this.documentMap[document.id] = document;
+        },
+        handleClick() {
+            console.log("FUCKLASJDKAJSDFK");
         },
     },
 };

@@ -1,7 +1,13 @@
 <template>
     <v-row>
         <v-col cols="4" md="4">
-            <v-dialog v-model="dialog" max-width="md" activator="parent">
+            <v-dialog v-model="dialog">
+                <template v-slot:activator="{ props }">
+                    <v-btn color="green" v-bind="props">
+                        Create
+                    </v-btn>
+                </template>
+
                 <v-card>
                     <v-card-title>
                         <v-row>
@@ -17,22 +23,24 @@
                     </v-card-item>
                     <v-card-text>
                         <v-row>
-                            <v-col padding="10" border="10">
-                                <v-row>
-                                    <v-text-field label="Document Name" v-model="documentName"></v-text-field>
-                                </v-row>
-                                <v-row>
-                                    <v-text-field label="URL" v-model="documentUrl" placeholder="https://"> </v-text-field>
-                                </v-row>
-                                <v-row>
-                                    <v-file-input label="File input" variant="solo-filled"></v-file-input>
-                                </v-row>
+                            <v-col cols="4">
+                                <v-card>
+                                    <v-row>
+                                        <v-text-field label="Document Name" v-model="documentName"></v-text-field>
+                                    </v-row>
+                                    <v-row>
+                                        <v-text-field label="URL" v-model="documentUrl" placeholder="https://">
+                                        </v-text-field>
+                                    </v-row>
+                                </v-card>
                             </v-col>
-                            <v-col>
-                                <v-row>
-                                    <v-textarea label="Document" variant="outlined" v-model="documentBody"> Docuemnt
-                                    </v-textarea>
-                                </v-row>
+                            <v-col cols="8">
+                                <v-card>
+                                    <v-row>
+                                        <v-textarea label="Document" variant="outlined" v-model="documentBody"> Docuemnt
+                                        </v-textarea>
+                                    </v-row>
+                                </v-card>
                             </v-col>
                         </v-row>
                     </v-card-text>
@@ -55,7 +63,7 @@
 
 <script>
 export default {
-    props: ['url'],
+    props: ['url', 'showDialog'],
     name: 'AddDocument',
     data() {
         return {
