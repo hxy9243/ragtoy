@@ -22,7 +22,7 @@
             </v-col>
             <v-col cols=8>
                 <div>
-                    <v-textarea v-model="documentBody" readonly=false>
+                    <v-textarea v-model="documentBody" readonly>
                     </v-textarea>
                 </div>
             </v-col>

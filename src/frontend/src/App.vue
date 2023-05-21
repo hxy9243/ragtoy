@@ -1,14 +1,16 @@
 <template>
-  <DocumentList url="http://localhost:5000" />
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+
+  <MainPage url="http://localhost:5000" />
 </template>
 
 <script>
-import DocumentList from './components/DocumentList.vue'
+import MainPage from './components/MainPage.vue'
 
 export default {
   name: 'App',
   components: {
-    DocumentList
+    MainPage
   }
 }
 </script>

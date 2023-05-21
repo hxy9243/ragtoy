@@ -1,18 +1,37 @@
 <template>
     <v-row>
-        <v-col cols="6" md="4">
-            <v-dialog v-model="dialog" activator="parent">
+        <v-col cols="4" md="4">
+            <v-dialog v-model="dialog" max-width="md" activator="parent">
                 <v-card>
+                    <v-card-title>
+                        <v-row>
+                            <div> Create a new Document </div>
+                        </v-row>
+                    </v-card-title>
+                    <v-card-item>
+
+                    </v-card-item>
                     <v-card-text>
                         <v-row>
-                            Create a new Document
+                            <v-col padding="10" border="10">
+                                <v-row>
+                                    <v-text-field label="Document Name" v-model="documentName"></v-text-field>
+                                </v-row>
+                                <v-row>
+                                    <v-text-field label="URL" v-model="documentUrl" placeholder="https://"> </v-text-field>
+                                </v-row>
+                                <v-row>
+                                    <v-file-input label="File input" variant="solo-filled"></v-file-input>
+                                </v-row>
+                            </v-col>
+                            <v-col>
+                                <v-row>
+                                    <v-textarea label="Document" variant="outlined" v-model="documentBody"> Docuemnt
+                                    </v-textarea>
+                                </v-row>
+                            </v-col>
                         </v-row>
                     </v-card-text>
-                    <v-card-item>
-                        <v-row>
-                            <v-file-input label="File input" variant="solo-filled"></v-file-input>
-                        </v-row>
-                    </v-card-item>
                     <v-card-actions>
                         <v-row>
                             <v-col>
@@ -38,6 +57,8 @@ export default {
         return {
             documents: [],
             documentMap: {},
+            documentName: '',
+            documentUrl: '',
             documentBody: '',
             selectedDocument: null,
             dialog: null,
