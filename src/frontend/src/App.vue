@@ -1,17 +1,13 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
   <DocumentList url="http://localhost:5000" />
-  <HelloWorld msg="Welcome to Your Vue.js App" />
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
 import DocumentList from './components/DocumentList.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld,
     DocumentList
   }
 }
@@ -23,7 +19,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: #0d8a6b;
   margin-top: 60px;
 }
 </style>
