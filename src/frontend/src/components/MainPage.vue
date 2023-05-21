@@ -1,27 +1,29 @@
 <template>
     <div class="document-list">
-        <h1>Chat Bot</h1>
+        <h1>Chat Toy</h1>
     </div>
+    <div class="page-container">
+        <div class="card-wrapper">
+            <v-row align="center" justify="center">
+                <v-col cols=8 md=6>
+                    <v-expansion-panels>
+                        <v-expansion-panel title="Documents" variant="accordion">
+                            <v-expansion-panel-text>
 
-    <v-row align="center" justify="center">
-        <v-col cols=8 md=6>
-            <v-expansion-panels>
-                <v-expansion-panel title="Documents" variant="accordion">
-                    <v-expansion-panel-text>
+                                <DocumentManage :url=this.url />
 
-                        <DocumentManage :url=this.url />
-
-                    </v-expansion-panel-text>
-                </v-expansion-panel>
-            </v-expansion-panels>
-        </v-col>
-    </v-row>
-
-    <v-row align="center" justify="center">
-        <v-col cols=8 md=6>
-            <ChatComponent />
-        </v-col>
-    </v-row>
+                            </v-expansion-panel-text>
+                        </v-expansion-panel>
+                    </v-expansion-panels>
+                </v-col>
+            </v-row>
+            <v-row align="center" justify="center">
+                <v-col cols=8 md=6>
+                    <ChatComponent />
+                </v-col>
+            </v-row>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -44,3 +46,16 @@ export default {
     },
 }
 </script>
+
+<style>
+.page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 20vh;
+}
+
+.card-wrapper {
+    margin-top: auto;
+    flex: 1;
+}
+</style>

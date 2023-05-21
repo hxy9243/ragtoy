@@ -12,10 +12,14 @@
 
                     <v-card-actions>
                         <v-row>
-                            <v-btn color="red">Delete</v-btn>
-                            <v-btn color="green">Add
-                                <DocumentAdd :url=this.url @addDocument="handleAddDocument" />
-                            </v-btn>
+                            <v-col cols="6">
+                                <v-btn color="red">Delete</v-btn>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-btn color="green">Add
+                                    <DocumentAdd :url=this.url @addDocument="handleAddDocument" />
+                                </v-btn>
+                            </v-col>
                         </v-row>
                     </v-card-actions>
                 </v-card>

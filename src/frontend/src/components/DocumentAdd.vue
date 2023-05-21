@@ -5,7 +5,11 @@
                 <v-card>
                     <v-card-title>
                         <v-row>
-                            <div> Create a new Document </div>
+                            <div>
+                                <h2>
+                                    Create a new Document
+                                </h2>
+                            </div>
                         </v-row>
                     </v-card-title>
                     <v-card-item>
