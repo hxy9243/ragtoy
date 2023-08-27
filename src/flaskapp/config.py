@@ -13,6 +13,6 @@ db = SQLAlchemy(app)
 
 load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')
-llm = LLM(api_key=api_key)
+llm = LLM(openai_api_key=api_key)
 
 vectorindices = VectorIndices('localhost', 6379)

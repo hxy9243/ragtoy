@@ -8,7 +8,6 @@ from flask import make_response, request
 
 from flaskapp.models import Document, Conversation, Message
 from flaskapp.vector import EmbeddingInfo
-from flaskapp.nlp import Preprocessor
 from flaskapp.config import db, llm, vectorindices
 
 
@@ -41,7 +40,7 @@ class DocumentsApi(Resource):
     def _create_embedding(self, docid, body):
         vectoridx = vectorindices.create(docid)
 
-        chunks = Preprocessor().chunkify(body)
+        chunks = llm.chunkify(body)
         ntokens = 0
         for i, chunk in enumerate(chunks):
             body, ntoken = chunk
@@ -64,6 +63,7 @@ class DocumentsApi(Resource):
     def post(self):
         req = request.get_json()
         body = req['document']
+        name: str = req['name']
         doctype = req['type']
 
         # check if the text is already uploaded, based on hash
@@ -79,6 +79,7 @@ class DocumentsApi(Resource):
 
         newdoc = Document(
             docid=docid,
+            name=name,
             doctype=doctype,
             hash=self._get_hash(body),
             body=body,
@@ -123,7 +124,7 @@ class DocumentConversationsApi(Resource):
         convs = db.session.execute(
             db.select(Conversation).
             where(Conversation.docid == docid),
-            ).scalars()
+        ).scalars()
 
         results = []
         for conv in convs:
@@ -232,9 +233,9 @@ class MessagesApi(Resource):
         msgtext = msgreq['text']
 
         conv = db.one_or_404(
-                db.select(Conversation).
-                where(Conversation.convid == convid)
-            )
+            db.select(Conversation).
+            where(Conversation.convid == convid)
+        )
         docid = conv.doc.docid
         db.session.commit()
 
