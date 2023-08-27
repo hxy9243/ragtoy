@@ -5,4 +5,4 @@ beautifulsoup4>=4.11.2
 pandas>=1.5.3
 python-dotenv>=1.0.0
 redis>=4.5.2
-spacy-langdetect>=1.0.7
+spacy-langdetect>=0.1.2
