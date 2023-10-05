@@ -1,3 +1,8 @@
+Flask>=3.0.0
+Flask-Cors>=4.0.0
+Flask-RESTful>=0.3.10
+Flask-SQSLAlchemy>=3.1.1
+langchain>=0.0.309
 openai>=0.27.1
 openai[embeddings]
 tiktoken>=0.3.0
