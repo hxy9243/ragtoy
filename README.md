@@ -25,7 +25,7 @@ For a local demo run
 2. Starts redis server
 
    ```
-   docker run -d --restart=always -p 6379:6379 -p 8000:8000 redis-stack-server
+   docker run -d --restart=always -p 6379:6379 -p 8000:8000 redis/redis-stack-server
    ```
 
    See:
