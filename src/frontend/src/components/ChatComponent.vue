@@ -1,21 +1,17 @@
 <template>
     <div class="container">
-        <div class="page-container parent-card scroller" align="left">
-            <div class="card-wrapper">
-                <v-card v-for="message in messages" class="child-card" :key="message" :label="message">
-                    <v-card-text class="card-text">
-                        {{ message }}
-                    </v-card-text>
-                </v-card>
-            </div>
+        <div class="page-container parent-card scroller messages" align="left">
+            <v-card v-for="message in messages" class="child-card" :key="message" :label="message">
+                <v-card-text class="card-text">
+                    {{ message }}
+                </v-card-text>
+            </v-card>
         </div>
         <div>
-            <v-row class="card-wrapper" align="center" justify="center">
-                <v-col>
-                    <v-textarea label="Ask something here" hint="Hit Enter to send, Shift+Enter to change lines"
-                        variant="solo" v-model="inputText" :rows="getNumRows" auto-grow max-rows="10"
-                        @keydown="handleKeydown" append-inner-icon='mdi-send' focus></v-textarea>
-                </v-col>
+            <v-row class="message-input" align="center" justify="center">
+                <v-textarea label="Ask something here" hint="Hit Enter to send, Shift+Enter to change lines" variant="solo"
+                    v-model="inputText" :rows="getNumRows" auto-grow max-rows="10" @keydown="handleKeydown"
+                    append-inner-icon='mdi-send' focus></v-textarea>
             </v-row>
         </div>
     </div>
@@ -68,11 +64,11 @@ export default {
 
 <style>
 .parent-card .child-card:nth-child(even) {
-    background-color: #dffffc;
+    background-color: #efefef;
 }
 
 .parent-card .child-card:nth-child(odd) {
-    background-color: #93e7f6;
+    background-color: #cacaca;
 }
 
 .child-card {
@@ -81,17 +77,25 @@ export default {
 
 .scroller {
     overflow-y: scroll;
-    max-height: 100%;
 }
 
 .page-container {
     display: flex;
+    width: 100%;
+    height: 100vh;
     flex-direction: column;
-    height: 60vh;
 }
 
-.card-wrapper {
-    flex: 1;
+.messages {
+    top: 0;
+    bottom: 60px;
+    position: relative;
+}
+
+.message-input {
+    padding: 10px;
+    position: absolute;
+    bottom: 0;
 }
 
 .card-text {
