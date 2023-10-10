@@ -1,11 +1,13 @@
 <template>
     <div class="container">
         <div class="page-container parent-card scroller messages" align="left">
-            <v-card v-for="message in messages" class="child-card" :key="message" :label="message">
-                <v-card-text class="card-text">
-                    {{ message }}
-                </v-card-text>
-            </v-card>
+            <div class="card-wrapper">
+                <v-card v-for="message in messages" class="child-card" :key="message" :label="message">
+                    <v-card-text class="card-text">
+                        {{ message }}
+                    </v-card-text>
+                </v-card>
+            </div>
         </div>
         <div>
             <v-row class="message-input" align="center" justify="center">
