@@ -1,7 +1,8 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey
+from flask_restx import fields
 
-from flaskapp.config import db
+from flaskapp.config import api, db
 
 
 class Document(db.Model):
@@ -24,11 +25,20 @@ class Document(db.Model):
 
     def data(self):
         return {
-            'name': self.name,
             'id': self.docid,
+            'name': self.name,
             'body': self.body,
             'type': self.doctype,
         }
+
+    @classmethod
+    def model(cls):
+        return api.model('Document', {
+            'id': fields.String,
+            'name': fields.String,
+            'body': fields.String,
+            'type': fields.String,
+        })
 
 
 class Conversation(db.Model):

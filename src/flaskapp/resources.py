@@ -3,15 +3,18 @@ import hashlib
 import uuid
 import datetime
 
-from flask_restful import Resource
+from flask_restx import Resource
 from flask import make_response, request
 
 from flaskapp.models import Document, Conversation, Message
 from flaskapp.vector import EmbeddingInfo
-from flaskapp.config import db, llm, vectorindices
+from flaskapp.config import api, db, llm, vectorindices
 
 
+@api.route('/documents')
 class DocumentsApi(Resource):
+
+    @api.marshal_with(Document.model(), as_list=True)
     def get(self):
         try:
             docs = db.session.execute(db.select(Document)).scalars()
@@ -60,6 +63,7 @@ class DocumentsApi(Resource):
 
         return ntokens
 
+    @api.marshal_with(Document.model(), as_list=True)
     def post(self):
         req = request.get_json()
         body = req['document']
