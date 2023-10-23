@@ -6,6 +6,7 @@ from typing import List, Tuple
 import numpy as np
 import tiktoken
 import langchain
+from langchain.llms import OpenAI
 from langchain.llms.base import LLM
 from langchain.embeddings.base import Embeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -30,7 +31,7 @@ class LLM:
         self.llm = self.get_llm(openai_api_key=openai_api_key)
 
     def get_llm(self, *args, **kwargs) -> LLM:
-        return langchain.OpenAI(openai_api_key=kwargs['openai_api_key'])
+        return OpenAI(openai_api_key=kwargs['openai_api_key'])
 
     def get_embedding(self, *args, **kwargs) -> Embeddings:
         return langchain.embeddings.OpenAIEmbeddings(
