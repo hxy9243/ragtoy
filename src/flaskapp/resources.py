@@ -63,12 +63,12 @@ class DocumentsApi(Resource):
 
         return ntokens
 
-    @api.marshal_with(Document.model(), as_list=True)
+    @api.marshal_with(Document.model(), as_list=False)
     def post(self):
         req = request.get_json()
-        body = req['document']
+        body: str = req['document']
         name: str = req['name']
-        doctype = req['type']
+        doctype: str = req['type']
 
         # check if the text is already uploaded, based on hash
         existing = self._get_existing(body)

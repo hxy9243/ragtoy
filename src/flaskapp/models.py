@@ -27,16 +27,16 @@ class Document(db.Model):
         return {
             'id': self.docid,
             'name': self.name,
-            'body': self.body,
+            'document': self.body,
             'type': self.doctype,
+            'ntokens': self.ntokens,
         }
 
     @classmethod
     def model(cls):
         return api.model('Document', {
-            'id': fields.String,
             'name': fields.String,
-            'body': fields.String,
+            'document': fields.String,
             'type': fields.String,
         })
 
