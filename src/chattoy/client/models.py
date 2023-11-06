@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import Dict
 import time
 
 
@@ -8,14 +8,14 @@ class Document:
     docid: str
     name: str
     doctype: str
-    body: str
+    document: str
     ntokens: int
 
     def data(self):
         return {
             'id': self.docid,
             'name': self.name,
-            'docuemnt': self.body,
+            'document': self.document,
             'type': self.doctype,
         }
 
@@ -29,11 +29,10 @@ class DocumentRequest(Document):
 class DocumentResponse(Document):
 
     @classmethod
-    def parse(cls, data: Dict) -> DocumentResponse:
+    def parse(cls, data: Dict) -> 'DocumentResponse':
         return DocumentResponse(
             docid=data['id'], name=data['name'], doctype=data['type'],
-            ntokens=data['ntokens'],
-            body='',
+            ntokens=data['ntokens'], document=data['document'],
         )
 
 

@@ -1,6 +1,6 @@
 from flask_restx import Api
 
-from flaskapp.resources import (
+from .resources import (
     DocumentsApi, DocumentApi, DocumentConversationsApi,
     ConversationsApi, ConversationApi,
     MessagesApi,

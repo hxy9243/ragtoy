@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-from flaskapp.vector import EmbeddingInfo, VectorIndices
+from .vector import EmbeddingInfo, VectorIndices
 
 TESTIDX = 'testidx'
 

@@ -7,13 +7,12 @@ license = "MIT"
 readme = "README.md"
 
 packages = [
-    { include = "flaskapp", from = "src" },
-    { include = "client", from = "src" },
+    { include = "chattoy", from = "src" },
 ]
 
 [tool.poetry.scripts]
-chattoy = "cmd.client:main"
-chattoy_server = "cmd.server:main"
+chattoy = "chattoy.cmd.client:main"
+chattoy_server = "chattoy.cmd.server:main"
 
 [tool.poetry.dependencies]
 python = "^3.9"

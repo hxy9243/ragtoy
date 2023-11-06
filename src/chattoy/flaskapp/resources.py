@@ -6,9 +6,9 @@ import datetime
 from flask_restx import Resource
 from flask import make_response, request
 
-from flaskapp.models import Document, Conversation, Message
-from flaskapp.vector import EmbeddingInfo
-from flaskapp.config import api, db, llm, vectorindices
+from .models import Document, Conversation, Message
+from .vector import EmbeddingInfo
+from .config import api, db, llm, vectorindices
 
 
 @api.route('/documents')

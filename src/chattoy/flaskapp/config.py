@@ -7,8 +7,8 @@ from flask_restx import Api
 from apispec.ext.marshmallow import MarshmallowPlugin
 from apispec import APISpec
 
-from flaskapp.nlp import LLM
-from flaskapp.vector import VectorIndices
+from .nlp import LLM
+from .vector import VectorIndices
 
 
 app = Flask(__name__)

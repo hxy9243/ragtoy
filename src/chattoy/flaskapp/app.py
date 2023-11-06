@@ -1,8 +1,8 @@
 from flask import Blueprint
 from flask_cors import CORS
 
-from flaskapp.route import create_api_route
-from flaskapp.config import app, db
+from .route import create_api_route
+from .config import app, db
 
 apibp = Blueprint('api', __name__)
 apibp = create_api_route(apibp)

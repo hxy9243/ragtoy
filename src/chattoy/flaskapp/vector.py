@@ -10,7 +10,7 @@ from redis.commands.search.query import Query
 
 import numpy as np
 
-from flaskapp.nlp import GPT3_EMBEDDING_SIZE
+from .nlp import GPT3_EMBEDDING_SIZE
 
 
 class VectorIndices:

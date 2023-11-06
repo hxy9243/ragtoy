@@ -2,7 +2,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey
 from flask_restx import fields
 
-from flaskapp.config import api, db
+from .config import api, db
 
 
 class Document(db.Model):
@@ -35,9 +35,11 @@ class Document(db.Model):
     @classmethod
     def model(cls):
         return api.model('Document', {
+            'id': fields.String,
             'name': fields.String,
             'document': fields.String,
             'type': fields.String,
+            'ntokens': fields.Integer,
         })
 
 
