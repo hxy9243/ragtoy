@@ -15,14 +15,14 @@ class Client:
     def __init__(self, server_addr):
         self.server_addr = server_addr
 
-    def add_document(self, doc: DocumentRequest) -> DocumentResponse:
+    def post_document(self, name, doctype, document) -> DocumentResponse:
+        doc = DocumentRequest(name=name, doctype=doctype, document=document)
         r = requests.post(
             parse.urljoin(self.server_addr, '/api/documents'),
             headers={'content-type': 'application/json'},
-            data=doc.data(),
+            json=doc.data(),
         )
-        logging.debug('getting API response:', r.status_code, r.text)
-
+        logging.debug(f'getting API response <{r.status_code}>: "{r.text}"')
         return DocumentResponse.parse(r.json())
 
     def get_document(self, docid) -> DocumentResponse:

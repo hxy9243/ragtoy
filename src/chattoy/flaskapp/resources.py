@@ -73,7 +73,7 @@ class DocumentsApi(Resource):
         # check if the text is already uploaded, based on hash
         existing = self._get_existing(body)
         if len(existing) != 0:
-            return make_response(existing[0].data())
+            return existing[0].data()
 
         docid = str(uuid.uuid4())
 
@@ -92,7 +92,7 @@ class DocumentsApi(Resource):
         db.session.add(newdoc)
         db.session.commit()
 
-        return make_response(newdoc.data(), 201)
+        return newdoc.data()
 
 
 class DocumentApi(Resource):

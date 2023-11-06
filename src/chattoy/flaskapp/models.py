@@ -33,6 +33,14 @@ class Document(db.Model):
         }
 
     @classmethod
+    def request_model(cls):
+        return api.model('DocumentRequest', {
+            'name': fields.String,
+            'type': fields.String,
+            'document': fields.String,
+        })
+
+    @classmethod
     def model(cls):
         return api.model('Document', {
             'id': fields.String,

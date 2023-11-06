@@ -15,14 +15,23 @@ class Document:
         return {
             'id': self.docid,
             'name': self.name,
-            'document': self.document,
             'type': self.doctype,
+            'document': self.document,
         }
 
 
 @dataclass
-class DocumentRequest(Document):
-    pass
+class DocumentRequest():
+    name: str
+    doctype: str
+    document: str
+
+    def data(self):
+        return {
+            'name': self.name,
+            'type': self.doctype,
+            'document': self.document,
+        }
 
 
 @dataclass
@@ -34,6 +43,14 @@ class DocumentResponse(Document):
             docid=data['id'], name=data['name'], doctype=data['type'],
             ntokens=data['ntokens'], document=data['document'],
         )
+
+    def __repr__(self):
+        if len(self.document) <= 50:
+            document = self.document
+        else:
+            document = self.document[:50].replace('\n', ' ') + '...'
+
+        return f'[{self.docid}] {self.name} (type:({self.doctype})) "{document}"'
 
 
 @dataclass
