@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "chat-toy"
+version = "0.0.1"
+description = "A toy web service to serve GPT endpoints"
+authors = ["Kevin Hu <hxy9243@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+packages = [
+    { include = "flaskapp", from = "src" },
+    { include = "client", from = "src" },
+]
+
+[tool.poetry.scripts]
+chattoy = "cmd.client:main"
+chattoy_server = "cmd.server:main"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+Flask = "^2.0.0"
+Flask-Cors = "^4.0.0"
+Flask-RESTful = "^0.3.10"
+Flask-SQLAlchemy = "^3.1.1"
+flask_restx = "^1.2.0"
+apispec = "^6.3"
+flasgger = "^0.9.7"
+langchain = "^0.0.309"
+openai = "^0.27.1"
+tiktoken = "^0.3.0"
+beautifulsoup4 = "^4.11.2"
+pandas = "^1.5.3"
+python-dotenv = "^1.0.0"
+redis = "^4.5.2"
+spacy-langdetect = "^0.1.2"
+
+[tool.poetry.extras]
+validation = ["apispec"]
+embeddings = ["openai"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
