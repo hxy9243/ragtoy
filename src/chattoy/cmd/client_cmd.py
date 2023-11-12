@@ -4,6 +4,8 @@ import argparse
 
 from chattoy.client import Client
 
+from chattoy.client.models import ConversationRequest
+
 
 def post_doc(args):
     cli = Client(args.server)
@@ -47,11 +49,38 @@ def del_doc(args):
 
 
 def add_conv(args):
-    pass
+    cli = Client(args.server)
+    r = cli.add_conversation(
+        ConversationRequest(
+            user=args.user,
+            docid=args.docid,
+        )
+    )
+    print(f"Added new conversation {r.convid}")
 
 
 def get_conv(args):
-    pass
+    cli = Client(args.server)
+
+    if not args.convids:
+        convs = cli.get_conversations()
+        for conv in convs:
+            print(conv)
+    else:
+        for convid in args.convids:
+            conv = cli.get_conversation(convid)
+            print(conv)
+
+
+def del_conv(args):
+    cli = Client(args.server)
+
+    if not args.convids:
+        print("Converstaion id not defined", file=sys.stderr)
+        return
+
+    for convid in args.convids:
+        cli.delete_conversation(convid)
 
 
 def main():
@@ -107,6 +136,10 @@ def main():
     get_conv_cmd = conv_parsers.add_parser("get", help="get conversations")
     get_conv_cmd.add_argument("convids", type=str, nargs="*", help="conversation ids")
     get_conv_cmd.set_defaults(func=get_conv)
+
+    del_conv_cmd = conv_parsers.add_parser("del", help="delete conversations")
+    del_conv_cmd.add_argument("convids", type=str, nargs="*", help="conversation ids")
+    del_conv_cmd.set_defaults(func=get_conv)
 
     # parse and execute
     args = parser.parse_args()

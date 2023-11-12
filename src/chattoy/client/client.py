@@ -69,16 +69,42 @@ class Client:
             parse.urljoin(self.server_addr, f"/api/conversations"),
             json=req.json(),
         )
-        return r.parse(r.json())
-
-    def get_conversations(self):
-        pass
+        return ConversationResponse.parse(r.json())
 
     def get_conversation(self, convid):
-        pass
+        r = requests.get(
+            parse.urljoin(self.server_addr, f"/api/conversations/{convid}"),
+        )
+        if r.status_code >= 400:
+            raise Exception(
+                f'Error getting conversations <{r.status_code}>: "{r.text}"'
+            )
+        return ConversationResponse.parse(r.json())
+
+    def get_conversations(self):
+        r = requests.get(
+            parse.urljoin(self.server_addr, "/api/conversations"),
+        )
+        if r.status_code >= 400:
+            raise Exception(
+                f'Error getting conversations <{r.status_code}>: "{r.text}"'
+            )
+
+        convs = []
+        for conv in r.json():
+            convs.append(ConversationResponse.parse(conv))
+
+        return convs
 
     def delete_conversation(self, convid):
-        pass
+        r = requests.delete(
+            parse.urljoin(self.server_addr, f"/api/conversations/{convid}"),
+        )
+        if r.status_code >= 400:
+            raise Exception(
+                f'Error getting conversations <{r.status_code}>: "{r.text}"'
+            )
+        return ConversationResponse.parse(r.json())
 
     def add_message(self, convid, msg):
         pass
