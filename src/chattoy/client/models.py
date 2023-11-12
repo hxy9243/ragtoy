@@ -124,6 +124,4 @@ class MessageResponse(Message):
         )
 
     def __repr__(self) -> str:
-        # t = datetime.fromtimestamp(self.time).isoformat()
-
         return f"[{self.time}] ({self.msgtype}) {self.message}"
