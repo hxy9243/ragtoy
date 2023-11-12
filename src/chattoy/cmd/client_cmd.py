@@ -2,9 +2,10 @@ import sys
 import logging
 import argparse
 
+
 from chattoy.client import Client
 
-from chattoy.client.models import ConversationRequest
+from chattoy.client.models import ConversationRequest, MessageRequest
 
 
 def post_doc(args):
@@ -83,6 +84,23 @@ def del_conv(args):
         cli.delete_conversation(convid)
 
 
+def chat_conv(args):
+    """interactive chat with the conversation"""
+    cli = Client(args.server)
+    convid = args.convid
+
+    conv = cli.get_conversation(convid[0])
+
+    for m in conv.messages:
+        print(m)
+
+    while True:
+        question = input("User: ")
+        msgs = cli.add_message(conv.convid, MessageRequest(text=question))
+        for msg in msgs:
+            print(msg)
+
+
 def main():
     logging.basicConfig(encoding="utf-8", level=logging.DEBUG)
 
@@ -118,7 +136,8 @@ def main():
     get_doc_cmd.add_argument("docids", type=str, nargs="*", help="document ids")
     get_doc_cmd.set_defaults(func=del_doc)
 
-    # add converstaions
+    # Converstaions related operations
+    # add new conversation
     conv_parser = subparsers.add_parser("conv", help="manage conversations")
     conv_parsers = conv_parser.add_subparsers(title="conv", dest="command")
 
@@ -135,10 +154,19 @@ def main():
     )
     post_conv_cmd.set_defaults(func=add_conv)
 
+    # get existing conversation
     get_conv_cmd = conv_parsers.add_parser("list", help="get conversations")
     get_conv_cmd.add_argument("convids", type=str, nargs="*", help="conversation ids")
     get_conv_cmd.set_defaults(func=get_conv)
 
+    # start chatting with conversation
+    get_conv_cmd = conv_parsers.add_parser(
+        "chat", help="start chatting with conversations"
+    )
+    get_conv_cmd.add_argument("convid", type=str, nargs=1, help="conversation id")
+    get_conv_cmd.set_defaults(func=chat_conv)
+
+    # delete conversation
     del_conv_cmd = conv_parsers.add_parser("del", help="delete conversations")
     del_conv_cmd.add_argument("convids", type=str, nargs="*", help="conversation ids")
     del_conv_cmd.set_defaults(func=del_conv)

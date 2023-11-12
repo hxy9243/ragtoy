@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import Dict
+from typing import List, Dict
 import time
+from datetime import datetime
 
 
 @dataclass
@@ -93,26 +94,36 @@ class Message:
     convid: str
     index: str
     context: str
-    msg: str
+    message: str
     ntokens: int
-    time: float = time.time()
+    msgtype: str
+    time: str
 
 
 @dataclass
-class MessageRequest(Message):
-    pass
+class MessageRequest:
+    text: str
+
+    def data(self):
+        return {"text": self.text}
 
 
 @dataclass
 class MessageResponse(Message):
     @classmethod
-    def parse(cls, data: Dict) -> "MessageResponse":
+    def parse(cls, data: List) -> List["MessageResponse"]:
         return MessageResponse(
-            msgid=data["msgid"],
+            msgid=data["id"],
             convid=data["convid"],
             index=data["index"],
             context=data["context"],
-            msg=data["msg"],
+            message=data["message"],
             ntokens=data["ntokens"],
             time=data["time"],
+            msgtype=data["msgtype"],
         )
+
+    def __repr__(self) -> str:
+        # t = datetime.fromtimestamp(self.time).isoformat()
+
+        return f"[{self.time}] ({self.msgtype}) {self.message}"

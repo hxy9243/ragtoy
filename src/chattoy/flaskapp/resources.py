@@ -271,12 +271,12 @@ class MessagesApi(Resource):
 
         logging.info("Adding new answer to conversaiton")
         answer = self._add_message(
-            convid, msgtype="llm", msgtext=answertext, context=prompt
+            convid, msgtype="system", msgtext=answertext, context=prompt
         )
 
         return make_response(
-            {
-                "question": msg.data(),
-                "answer": answer.data(),
-            }
+            [
+                msg.data(),
+                answer.data(),
+            ],
         )

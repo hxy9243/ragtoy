@@ -73,7 +73,7 @@ class Client:
         logging.debug(f'getting add API response <{r.status_code}>: "{r.text}"')
         return ConversationResponse.parse(r.json())
 
-    def get_conversation(self, convid):
+    def get_conversation(self, convid: str) -> ConversationResponse:
         r = requests.get(
             parse.urljoin(self.server_addr, f"/api/conversations/{convid}"),
         )
@@ -84,7 +84,7 @@ class Client:
             )
         return ConversationResponse.parse(r.json())
 
-    def get_conversations(self):
+    def get_conversations(self) -> List[ConversationResponse]:
         r = requests.get(
             parse.urljoin(self.server_addr, "/api/conversations"),
         )
@@ -100,7 +100,7 @@ class Client:
 
         return convs
 
-    def delete_conversation(self, convid):
+    def delete_conversation(self, convid: str) -> ConversationResponse:
         r = requests.delete(
             parse.urljoin(self.server_addr, f"/api/conversations/{convid}"),
         )
@@ -111,8 +111,18 @@ class Client:
             )
         return ConversationResponse.parse(r.json())
 
-    def add_message(self, convid, msg):
-        pass
+    def add_message(self, convid: str, msg: MessageRequest) -> List[MessageResponse]:
+        r = requests.post(
+            parse.urljoin(self.server_addr, f"/api/conversations/{convid}/messages"),
+            json=msg.data(),
+        )
+        logging.debug(f'adding new message response <{r.status_code}>: "{r.text}"')
+        if r.status_code >= 400:
+            raise Exception(
+                f'Error getting conversations <{r.status_code}>: "{r.text}"'
+            )
+        msgs = []
+        for msg in r.json():
+            msgs.append(MessageResponse.parse(msg))
 
-    def get_messages(self, convid):
-        pass
+        return msgs
