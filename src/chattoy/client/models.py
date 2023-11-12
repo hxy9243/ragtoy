@@ -64,7 +64,7 @@ class Conversation:
 
 
 @dataclass
-class ConversationRequest(Conversation):
+class ConversationRequest:
     user: str
     docid: str
 
@@ -78,9 +78,9 @@ class ConversationRequest(Conversation):
 @dataclass
 class ConversationResponse(Conversation):
     @classmethod
-    def parse(data: Dict) -> "ConversationResponse":
+    def parse(cls, data: Dict) -> "ConversationResponse":
         return ConversationResponse(
-            convid=data["convid"],
+            convid=data["id"],
             docid=data["docid"],
             user=data["user"],
             messages=[MessageResponse.parse(msg) for msg in data["messages"]],

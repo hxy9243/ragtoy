@@ -77,6 +77,7 @@ class Conversation(db.Model):
             'id': self.convid,
             'docid': self.docid,
             'user': self.user,
+            'messages': self.messages,
         }
 
 

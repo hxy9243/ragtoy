@@ -109,7 +109,7 @@ def main():
     post_doc_cmd.set_defaults(func=post_doc)
 
     # get document get operations
-    get_doc_cmd = doc_parsers.add_parser("get", help="get documents")
+    get_doc_cmd = doc_parsers.add_parser("list", help="get documents")
     get_doc_cmd.add_argument("docids", type=str, nargs="*", help="document ids")
     get_doc_cmd.set_defaults(func=get_doc)
 
@@ -121,25 +121,27 @@ def main():
     # add converstaions
     conv_parser = subparsers.add_parser("conv", help="manage conversations")
     conv_parsers = conv_parser.add_subparsers(title="conv", dest="command")
-    conv_parsers.set_defaults(func=add_conv)
 
     post_conv_cmd = conv_parsers.add_parser("add", help="add a new conversation")
     post_conv_cmd.add_argument(
         "--user",
         type=str,
         action="store",
-        default="default",
+        default="default-user",
         help="sepcifcy user",
     )
-    post_conv_cmd.add_argument("--doc", type=str, action="store", help="document id")
+    post_conv_cmd.add_argument(
+        "--docid", type=str, action="store", default="", help="document id"
+    )
+    post_conv_cmd.set_defaults(func=add_conv)
 
-    get_conv_cmd = conv_parsers.add_parser("get", help="get conversations")
+    get_conv_cmd = conv_parsers.add_parser("list", help="get conversations")
     get_conv_cmd.add_argument("convids", type=str, nargs="*", help="conversation ids")
     get_conv_cmd.set_defaults(func=get_conv)
 
     del_conv_cmd = conv_parsers.add_parser("del", help="delete conversations")
     del_conv_cmd.add_argument("convids", type=str, nargs="*", help="conversation ids")
-    del_conv_cmd.set_defaults(func=get_conv)
+    del_conv_cmd.set_defaults(func=del_conv)
 
     # parse and execute
     args = parser.parse_args()

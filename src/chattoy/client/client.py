@@ -57,6 +57,7 @@ class Client:
         r = requests.delete(
             parse.urljoin(self.server_addr, f"/api/documents/{docid}"),
         )
+        logging.debug(f'getting delete API response <{r.status_code}>: "{r.text}"')
         if r.status_code >= 400:
             raise Exception(
                 f'Error deleting document {docid} <{r.status_code}>: "{r.text}"'
@@ -69,12 +70,14 @@ class Client:
             parse.urljoin(self.server_addr, f"/api/conversations"),
             json=req.json(),
         )
+        logging.debug(f'getting add API response <{r.status_code}>: "{r.text}"')
         return ConversationResponse.parse(r.json())
 
     def get_conversation(self, convid):
         r = requests.get(
             parse.urljoin(self.server_addr, f"/api/conversations/{convid}"),
         )
+        logging.debug(f'getting get API response <{r.status_code}>: "{r.text}"')
         if r.status_code >= 400:
             raise Exception(
                 f'Error getting conversations <{r.status_code}>: "{r.text}"'
@@ -85,6 +88,7 @@ class Client:
         r = requests.get(
             parse.urljoin(self.server_addr, "/api/conversations"),
         )
+        logging.debug(f'getting get response <{r.status_code}>: "{r.text}"')
         if r.status_code >= 400:
             raise Exception(
                 f'Error getting conversations <{r.status_code}>: "{r.text}"'
@@ -100,6 +104,7 @@ class Client:
         r = requests.delete(
             parse.urljoin(self.server_addr, f"/api/conversations/{convid}"),
         )
+        logging.debug(f'getting delete response <{r.status_code}>: "{r.text}"')
         if r.status_code >= 400:
             raise Exception(
                 f'Error getting conversations <{r.status_code}>: "{r.text}"'
