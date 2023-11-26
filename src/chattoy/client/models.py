@@ -87,6 +87,15 @@ class ConversationResponse(Conversation):
             messages=[MessageResponse.parse(msg) for msg in data["messages"]],
         )
 
+    def dump(self, last=3):
+        """pretty print conversation information"""
+        print(
+            f"Conversation ID: {self.convid}, Document ID: {self.docid} from user: {self.user}"
+        )
+        n_msgs = min(last, len(self.messages))
+        for m in self.messages[-n_msgs:]:
+            print(m)
+
 
 @dataclass
 class Message:

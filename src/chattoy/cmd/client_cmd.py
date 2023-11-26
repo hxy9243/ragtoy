@@ -1,3 +1,4 @@
+import os
 import sys
 import logging
 import argparse
@@ -36,7 +37,10 @@ def get_doc(args):
         docs.append(cli.get_document(docid))
 
     for doc in docs:
-        print(doc)
+        if args.full:
+            print(doc.document)
+        else:
+            print(doc)
 
 
 def del_doc(args):
@@ -66,11 +70,11 @@ def get_conv(args):
     if not args.convids:
         convs = cli.get_conversations()
         for conv in convs:
-            print(conv)
+            conv.dump()
     else:
         for convid in args.convids:
             conv = cli.get_conversation(convid)
-            print(conv)
+            conv.dump()
 
 
 def del_conv(args):
@@ -102,8 +106,6 @@ def chat_conv(args):
 
 
 def main():
-    logging.basicConfig(encoding="utf-8", level=logging.DEBUG)
-
     parser = argparse.ArgumentParser(description="A simple chat toy application cli")
     parser.add_argument(
         "--server",
@@ -111,6 +113,15 @@ def main():
         default="http://localhost:5000",
         help="the remote API server address",
     )
+    parser.add_argument(
+        "-v",
+        "--verbosity",
+        action="store",
+        default="INFO",
+        help="defines logging level",
+        choices=["ERROR", "WARNING", "INFO", "DEBUG"],
+    )
+
     subparsers = parser.add_subparsers(title="commands", dest="command")
 
     # Add document operations
@@ -129,6 +140,9 @@ def main():
     # get document get operations
     get_doc_cmd = doc_parsers.add_parser("list", help="get documents")
     get_doc_cmd.add_argument("docids", type=str, nargs="*", help="document ids")
+    get_doc_cmd.add_argument(
+        "--full", action="store_true", help="download the whole document text"
+    )
     get_doc_cmd.set_defaults(func=get_doc)
 
     # del document get operations
@@ -173,6 +187,17 @@ def main():
 
     # parse and execute
     args = parser.parse_args()
+    match args.verbosity:
+        case "ERROR":
+            loglevel = logging.ERROR
+        case "WARNING":
+            loglevel = logging.WARNING
+        case "INFO":
+            loglevel = logging.INFO
+        case "DEBUG":
+            loglevel = logging.DEBUG
+
+    logging.basicConfig(encoding="utf-8", level=loglevel)
     if hasattr(args, "func"):
         args.func(args)
     else:
