@@ -98,11 +98,14 @@ def chat_conv(args):
     for m in conv.messages:
         print(m)
 
-    while True:
-        question = input("User: ")
-        msgs = cli.add_message(conv.convid, MessageRequest(text=question))
-        for msg in msgs:
-            print(msg)
+    try:
+        while True:
+            question = input("User: ")
+            msgs = cli.add_message(conv.convid, MessageRequest(text=question))
+            for msg in msgs:
+                print(msg)
+    except KeyboardInterrupt:
+        print("\nExiting...")
 
 
 def main():
