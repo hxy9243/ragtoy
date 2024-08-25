@@ -1,23 +1,32 @@
-import os
+from dataclasses import dataclass
+
+import sqlite3
+
 from dotenv import load_dotenv
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_restx import Api
-
-from apispec.ext.marshmallow import MarshmallowPlugin
-from apispec import APISpec
-
-from .nlp import LLM
-from .vector import VectorIndices
+import chromadb
+from llama_index.vector_stores.chroma import ChromaVectorStore
+from llama_index.llms.openai import OpenAI
+from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.llms.openai import OpenAI
+from llama_index.core import Settings
 
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
-api = Api(app, version='1.0', doc='/doc')
-db = SQLAlchemy(app)
+@dataclass
+class Config:
+    db = None
+    vector = None
 
-load_dotenv()
-api_key = os.getenv('OPENAI_API_KEY')
-llm = LLM(openai_api_key=api_key)
+    def __init__(self):
+        load_dotenv()
 
-vectorindices = VectorIndices('localhost', 6379)
+        self.db = sqlite3.connect("db/chattoy.db")
+        chroma_db = chromadb.PersistentClient("db/chattoy.chroma")
+        chroma_coll = chroma_db.get_or_create_collection("rag")
+
+        self.vector_store = ChromaVectorStore(chroma_collection=chroma_coll)
+
+        self._setup_llama_index()
+
+    def _setup_llama_index(self):
+        Settings.llm = OpenAI(model="gpt-3.5-turbo")
+        Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-small")

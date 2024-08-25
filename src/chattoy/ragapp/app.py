@@ -1,18 +1,22 @@
+from typing import List
 
+from .config import Config
 
-class App:
-
-    def __init__(self):
-        self.llm = None
-        self.db = None
-        self.vector = None
-
+from llama_index.core import Settings, SimpleDirectoryReader, VectorStoreIndex
 
 class Documents:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, config: Config):
+        self.config = config
+
 
     def add(self, path: str):
+        # chunkfy document
+
+        # create embeddings
+
+        # save embedding
+
+        # save document
 
         pass
 
@@ -28,7 +32,7 @@ class Documents:
     def related(self, docid: str, limit=5) -> List[str]:
         pass
 
-    
+
 
 
 class Messages:
