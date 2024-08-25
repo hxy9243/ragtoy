@@ -5,13 +5,27 @@ import logging
 
 import click
 
-logging.basicConfig(level=logging.DEBUG, handlers=[logging.StreamHandler(sys.stdout)])
+from chattoy.ragapp.config import Config
+from chattoy.ragapp.app import Documents
+
+logging.basicConfig(level=logging.INFO, handlers=[logging.StreamHandler(sys.stdout)])
 
 
 @click.command(help="Ask questions based on all the documents in the DB")
 @click.argument("prompt")
 def ask(prompt: str):
     logging.debug(f"Ask a question: {prompt}")
+
+    docs = Documents()
+
+    if prompt:
+        nodes = docs.search(prompt)
+        for n in nodes:
+            print(n)
+    else:
+        while True:
+            nodes = docs.search(prompt)
+            print(nodes)
 
 
 @click.group(help="Document related operations")
@@ -23,6 +37,8 @@ def document():
 @click.argument("path")
 def add(path: str):
     logging.debug(f"Adding a new path {path}")
+
+    Documents().add(path)
 
 
 @click.command(help="List the documents")

@@ -1,24 +1,37 @@
 from typing import List
+from pathlib import Path
+
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from .config import Config
 
-from llama_index.core import Settings, SimpleDirectoryReader, VectorStoreIndex
 
 class Documents:
-    def __init__(self, config: Config):
-        self.config = config
-
+    def __init__(self):
+        self.config = Config()
 
     def add(self, path: str):
-        # chunkfy document
+        # read document
+        if Path(path).is_file():
+            reader = SimpleDirectoryReader(input_files=[path])
+        else:
+            reader = SimpleDirectoryReader(path)
 
-        # create embeddings
+        docs = reader.load_data()
+        nodes = self.config.text_splitter.get_nodes_from_documents(docs)
 
-        # save embedding
+        # create index from added documents
+        index = VectorStoreIndex(nodes, storage_context=self.config.storage_context)
+        retriever = index.as_query_engine(streaming=True)
 
-        # save document
+        # save to database
+        # TODO
 
-        pass
+        while True:
+            r = retriever.query(input(">>> "))
+            r.print_response_stream()
+            print()
 
     def ls(self) -> List[str]:
         pass
@@ -27,12 +40,13 @@ class Documents:
         pass
 
     def search(self, prompt: str) -> List[str]:
-        pass
+        index = VectorStoreIndex.from_vector_store(self.config.vector_store)
+
+        retriever = index.as_retriever()
+        return retriever.retrieve(prompt)
 
     def related(self, docid: str, limit=5) -> List[str]:
         pass
-
-
 
 
 class Messages:
