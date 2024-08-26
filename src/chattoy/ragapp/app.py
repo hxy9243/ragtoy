@@ -2,7 +2,6 @@ from typing import List
 from pathlib import Path
 
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
-from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from .config import Config
 
@@ -23,15 +22,7 @@ class Documents:
 
         # create index from added documents
         index = VectorStoreIndex(nodes, storage_context=self.config.storage_context)
-        retriever = index.as_query_engine(streaming=True)
-
-        # save to database
-        # TODO
-
-        while True:
-            r = retriever.query(input(">>> "))
-            r.print_response_stream()
-            print()
+        index.insert_nodes(nodes)
 
     def ls(self) -> List[str]:
         pass
@@ -39,10 +30,26 @@ class Documents:
     def rm(self, id: str):
         pass
 
-    def search(self, prompt: str) -> List[str]:
+    def chat(self):
+        # create index from added documents
+        index = VectorStoreIndex.from_vector_store(self.config.vector_store)
+        retriever = index.as_chat_engine(streaming=True, similarity_top_k=3)
+
+        while True:
+            r = retriever.stream_chat(input("question > "))
+            r.print_response_stream()
+            print('\n' + '=' * 40)
+            print("Sources:")
+            for i, n in enumerate(r.source_nodes):
+                if i != 0:
+                    print('-' * 20)
+                print(n)
+            print('=' * 40)
+
+    def search(self, prompt: str, top_k: int=3) -> List[str]:
         index = VectorStoreIndex.from_vector_store(self.config.vector_store)
 
-        retriever = index.as_retriever()
+        retriever = index.as_retriever(similarity_top_k=top_k)
         return retriever.retrieve(prompt)
 
     def related(self, docid: str, limit=5) -> List[str]:

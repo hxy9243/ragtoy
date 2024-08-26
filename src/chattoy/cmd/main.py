@@ -8,24 +8,15 @@ import click
 from chattoy.ragapp.config import Config
 from chattoy.ragapp.app import Documents
 
-logging.basicConfig(level=logging.INFO, handlers=[logging.StreamHandler(sys.stdout)])
+logging.basicConfig(level=logging.WARN, handlers=[logging.StreamHandler(sys.stdout)])
 
 
 @click.command(help="Ask questions based on all the documents in the DB")
-@click.argument("prompt")
-def ask(prompt: str):
-    logging.debug(f"Ask a question: {prompt}")
-
+def chat():
     docs = Documents()
 
-    if prompt:
-        nodes = docs.search(prompt)
-        for n in nodes:
-            print(n)
-    else:
-        while True:
-            nodes = docs.search(prompt)
-            print(nodes)
+    logging.debug(f"Interactively asking questions")
+    docs.chat()
 
 
 @click.group(help="Document related operations")
@@ -58,6 +49,12 @@ def rm(docid: str):
 def search(prompt: str):
     logging.debug(f"Search a document based on prompt: {prompt}")
 
+    nodes = Documents().search(prompt)
+    for n in nodes:
+        text = n.text[:min(len(n.text), 128)]
+        print(f"{n.metadata['file_path']} \nText: {text}...\nScore: {n.score}")
+        print("-" * 40)
+
 
 @click.command(help="")
 @click.argument("docid")
@@ -78,7 +75,7 @@ def main():
 
 
 main.add_command(document)
-main.add_command(ask)
+main.add_command(chat)
 
 if __name__ == "__main__":
     main()
