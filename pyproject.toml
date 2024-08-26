@@ -11,8 +11,7 @@ packages = [
 ]
 
 [tool.poetry.scripts]
-chattoy = "chattoy.cmd.client_cmd:main"
-chattoy_server = "chattoy.cmd.server_cmd:main"
+chattoy = "chattoy.cmd.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -24,17 +23,27 @@ flask_restx = "^1.2.0"
 apispec = "^6.3"
 flasgger = "^0.9.7"
 langchain = "^0.0.309"
-openai = "^0.27.1"
 tiktoken = "^0.3.0"
 beautifulsoup4 = "^4.11.2"
 pandas = "^1.5.3"
 python-dotenv = "^1.0.0"
 redis = "^4.5.2"
 spacy-langdetect = "^0.1.2"
+fire = "^0.6.0"
+click = "^8.1.7"
+llama-index-core = "^0.11.1"
+llama-index-llms-openai = "^0.2.0"
+chromadb = "^0.5.5"
+llama-index-vector-stores-chroma = "^0.2.0"
+llama-index-embeddings-openai = "^0.2.3"
+pydantic = "^2.8.2"
 
 [tool.poetry.extras]
 validation = ["apispec"]
 embeddings = ["openai"]
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,6 +1,5 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey
-from flask_restx import fields
 
 from .config import api, db
 
@@ -9,6 +8,8 @@ class Document(db.Model):
     __tablename__ = "documents"
     docid = db.Column("id", db.String(16), primary_key=True)
     name = db.Column("name", db.String(16), unique=True, nullable=False)
+    path = db.Column("path", db.String(16), unique=True)
+    modtime = db.Column("modtime", db.String(16))
     doctype = db.Column("type", db.String(16), default="text")
     hash = db.Column("hash", db.String(64))
     body = db.Column("body", db.Text)
@@ -30,65 +31,6 @@ class Document(db.Model):
             "document": self.body,
             "type": self.doctype,
             "ntokens": self.ntokens,
-        }
-
-    @classmethod
-    def request_model(cls):
-        return api.model(
-            "DocumentRequest",
-            {
-                "name": fields.String,
-                "type": fields.String,
-                "document": fields.String,
-            },
-        )
-
-    @classmethod
-    def model(cls):
-        return api.model(
-            "Document",
-            {
-                "id": fields.String,
-                "name": fields.String,
-                "document": fields.String,
-                "type": fields.String,
-                "ntokens": fields.Integer,
-            },
-        )
-
-
-class Conversation(db.Model):
-    __tablename__ = "conversations"
-    convid = db.Column("id", db.String(16), primary_key=True)
-    docid = db.Column(
-        "docid",
-        db.String(16),
-        ForeignKey(Document.docid),
-        nullable=False,
-    )
-    user = db.Column("user", db.String(16))
-
-    doc = relationship(
-        "Document",
-        back_populates="conversations",
-    )
-    messages = relationship(
-        "Message", cascade="all, delete-orphan", back_populates="conversation"
-    )
-
-    def __repr__(self):
-        return f"<Conversation {self.convid}>"
-
-    def data(self):
-        msgs = []
-        for m in self.messages:
-            msgs.append(m.data())
-
-        return {
-            "id": self.convid,
-            "docid": self.docid,
-            "user": self.user,
-            "messages": msgs,
         }
 
 
