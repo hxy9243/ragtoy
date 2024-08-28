@@ -1,17 +1,18 @@
 [tool.poetry]
-name = "chat-toy"
+name = "ragtoy"
 version = "0.0.1"
-description = "A toy web service to serve GPT endpoints"
+description = "An example RAG command line toy implementation"
 authors = ["Kevin Hu <hxy9243@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 
 packages = [
-    { include = "chattoy", from = "src" },
+    { include = "command", from = "src" },
+    { include = "ragtoy", from = "src" },
 ]
 
 [tool.poetry.scripts]
-ragtoy = "chattoy.cmd.main:main"
+ragtoy = "command.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.9"

@@ -1,65 +1,44 @@
-Chat Toy
+RAG Toy
 ====
 
 # Summary
 
-A toy application that implements basic RAG queries for documents, based on
-OpenAI ChatGPT API and Redit Vector Search.
+This is an example toy local application that implements basic RAG queries for documents, based on
+OpenAI ChatGPT API and embedding-based Vector Search.
 
 Currently under construction. Please stay tuned!
 
-# Demo
+# Quick Start
 
-For a local demo run
+The project is setup by [poetry](https://python-poetry.org/). Use `poetry` to install the project:
 
-1. Prepare for environment
+```
+poetry install
+poetry shell
+```
 
-   - Install dependencies from `pyproject` with `poetry install`. This will install:
+Add `OPENAI_API_KEY` to `.env` file:
 
-      - `chattoy_server`: the server application that manages running the backend service.
-      - `chattoy`: the example client.
+```
+OPENAI_API_KEY=sk-xxxx
+```
 
-   - Creates `.env` environment file for your openAI token:
+After the above setup, run the `ragtoy` cli entry. For example, to add a new document:
 
-   ```
-   OPENAI_API_KEY=sk-xxxx
-   ```
+```sh
+ragtoy document add <path to doc>
+```
 
-2. Starts redis server for vector indexing
+To chat with all the documents:
 
-   Start redis stack server manually, or use docker:
-
-   ```
-   docker run -d --restart=always -p 6379:6379 -p 8000:8000 redis/redis-stack-server
-   ```
-
-   See:
-
-   - <https://redis.io/docs/stack/>
-   - <https://redis.io/docs/stack/get-started/install/docker/>
-
-2. Init database and start Flask app server
-
-   Init database
-
-   ```
-   chattoy_server init
-   chattoy_server run
-   ```
-
-3. Queries API interface
-
-   See definition in [app.py](src/flaskapp/app.py).
-   (Documentation to come soon...)
-
-   e.g.:
-
-   ```
-   curl -XPOST -H 'content-type=application/json' -d @data.json localhost:5000/documents
-   ```
-
-   data.json:
-
-   ```
-   {"document": "example text here.", "type": "text"}
-   ```
+```sh
+# start interactive chat loop
+ % ragtoy chat
+question > What year was Alan Turing born?
+Alan Turing was born on June 23, 1912.
+========================================
+Sources:
+Node ID: 31b33cbf-2a48-4b2b-8f44-1f239dc22e45
+Text: 6 Google LaMDA chatbot 7 Conferences  7.1 Turing Colloquium 7.2
+...
+```
