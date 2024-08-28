@@ -5,8 +5,8 @@ import logging
 
 import click
 
-from chattoy.ragapp.config import Config
-from chattoy.ragapp.app import Documents
+from ragtoy.config import Config
+from ragtoy.app import Documents
 
 logging.basicConfig(level=logging.WARN, handlers=[logging.StreamHandler(sys.stdout)])
 
