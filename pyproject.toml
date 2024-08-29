@@ -38,6 +38,8 @@ chromadb = "^0.5.5"
 llama-index-vector-stores-chroma = "^0.2.0"
 llama-index-embeddings-openai = "^0.2.3"
 pydantic = "^2.8.2"
+llama-index-readers-file = "^0.2.0"
+llama-index = "^0.11.2"
 
 [tool.poetry.extras]
 validation = ["apispec"]
