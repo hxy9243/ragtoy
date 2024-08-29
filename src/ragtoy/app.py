@@ -21,7 +21,10 @@ class Documents:
         nodes = self.config.text_splitter.get_nodes_from_documents(docs)
 
         # create index from added documents
-        index = VectorStoreIndex(nodes, storage_context=self.config.storage_context)
+        index = VectorStoreIndex.from_vector_store(
+            vector_store=self.config.vector_store,
+            show_progress=True,
+        )
         index.insert_nodes(nodes)
 
     def ls(self) -> List[str]:
@@ -32,7 +35,7 @@ class Documents:
 
     def chat(self):
         # create index from added documents
-        index = VectorStoreIndex.from_vector_store(self.config.vector_store)
+        index = VectorStoreIndex.from_vector_store(vector_store=self.config.vector_store)
         retriever = index.as_chat_engine(streaming=True, similarity_top_k=3)
 
         while True:
