@@ -1,9 +1,9 @@
-import os
 from dataclasses import dataclass
 from pathlib import Path
 
 from dotenv import load_dotenv
 import chromadb
+from llama_index.core import Settings
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.llms.openai import OpenAI
@@ -30,5 +30,5 @@ class Config:
         self._setup_llama_index()
 
     def _setup_llama_index(self):
-        Settings.llm = OpenAI(model="gpt-turbo-3.5")
+        Settings.llm = OpenAI()
         Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-small")
