@@ -1,66 +1,55 @@
-from sqlalchemy.orm import relationship
-from sqlalchemy import ForeignKey
+from typing import List
 
-from .config import api, db
+from sqlalchemy import String, DateTime, ForeignKey
+from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class Document(db.Model):
+Base = declarative_base()
+
+
+class Document(Base):
     __tablename__ = "documents"
-    docid = db.Column("id", db.String(16), primary_key=True)
-    name = db.Column("name", db.String(16), unique=True, nullable=False)
-    path = db.Column("path", db.String(16), unique=True)
-    modtime = db.Column("modtime", db.String(16))
-    doctype = db.Column("type", db.String(16), default="text")
-    hash = db.Column("hash", db.String(64))
-    body = db.Column("body", db.Text)
-    ntokens = db.Column("ntokens", db.Integer)
 
-    conversations = relationship(
-        "Conversation",
-        cascade="all, delete-orphan",
-        back_populates="doc",
-    )
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    name: Mapped[str] = mapped_column(String(32))
+    path: Mapped[str] = mapped_column(String(256))
+    hash: Mapped[str] = mapped_column(String(32))
+    type: Mapped[str] = mapped_column(String(16))
+    created_time: Mapped[DateTime] = mapped_column(DateTime)
+
+    chunks: Mapped[List["Chunk"]] = relationship(back_populates="document")
 
     def __repr__(self):
-        return f"<Document {self.docid}>"
+        return f"<Document {self.id}>"
 
-    def data(self):
+    def dict(self):
         return {
-            "id": self.docid,
+            "id": self.id,
             "name": self.name,
-            "document": self.body,
-            "type": self.doctype,
-            "ntokens": self.ntokens,
+            "path": self.path,
+            "hash": self.hash,
+            "type": self.type,
+            "created_time": self.created_time,
         }
 
+class Chunk(Base):
+    __tablename__ = "chunks"
 
-class Message(db.Model):
-    __tablename__ = "messages"
-    msgid = db.Column("id", db.String(16), primary_key=True)
-    convid = db.Column("convid", db.ForeignKey("conversations.id"), nullable=False)
-    index = db.Column("index", db.Integer)
-    msg = db.Column("message", db.Text)
-    msgtype = db.Column("type", db.String(32))
-    context = db.Column("context", db.Text)
-    ntokens = db.Column("ntokens", db.Integer)
-    time = db.Column("time", db.DateTime)
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    hash: Mapped[str] = mapped_column(String(32))
+    docid: Mapped[str] = mapped_column(ForeignKey("documents.id"))
 
-    conversation = relationship(
-        "Conversation",
-        back_populates="messages",
-    )
+    document: Mapped["Document"] = relationship(back_populates="chunks")
 
     def __repr__(self):
-        return f"<Message {self.convid}>"
+        # return f"<Chunk {self.id} from {self.doc.id}: {self.hash}>"
+        return ""
 
-    def data(self):
+    def to_dict(self):
         return {
-            "convid": self.convid,
-            "id": self.msgid,
-            "index": self.index,
-            "message": self.msg,
-            "msgtype": self.msgtype,
-            "context": self.context,
-            "ntokens": self.ntokens,
-            "time": self.time.isoformat(),
+            "id": self.id,
+            "hash": self.hash,
+            # "docid": self.doc.id,
         }
+
