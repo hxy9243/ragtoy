@@ -23,7 +23,7 @@ class Config:
         chroma_db = chromadb.PersistentClient("db/chattoy.chroma")
         chroma_coll = chroma_db.get_or_create_collection("rag", metadata={"hnsw:space": "cosine"})
 
-        self.db = "sqlite://db/docs.db"
+        self.db_url = "sqlite:///db/ragtoy.db"
 
         self.vector_store = ChromaVectorStore(chroma_collection=chroma_coll)
         self.text_splitter = SentenceSplitter.from_defaults(
