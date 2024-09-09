@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import String, DateTime, ForeignKey
+from sqlalchemy import String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -16,7 +16,8 @@ class Document(Base):
     path: Mapped[str] = mapped_column(String(256))
     hash: Mapped[str] = mapped_column(String(32))
     type: Mapped[str] = mapped_column(String(16))
-    created_time: Mapped[DateTime] = mapped_column(DateTime)
+    text: Mapped[str] = mapped_column(Text)
+    creation_date: Mapped[DateTime] = mapped_column(DateTime)
 
     chunks: Mapped[List["Chunk"]] = relationship(back_populates="document")
 
@@ -30,26 +31,24 @@ class Document(Base):
             "path": self.path,
             "hash": self.hash,
             "type": self.type,
-            "created_time": self.created_time,
+            "creation_date": self.creation_date,
         }
 
 class Chunk(Base):
     __tablename__ = "chunks"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    hash: Mapped[str] = mapped_column(String(32))
     docid: Mapped[str] = mapped_column(ForeignKey("documents.id"))
 
     document: Mapped["Document"] = relationship(back_populates="chunks")
 
     def __repr__(self):
-        # return f"<Chunk {self.id} from {self.doc.id}: {self.hash}>"
-        return ""
+        return f"<Chunk {self.id} from {self.doc.id}: {self.hash}>"
 
     def to_dict(self):
         return {
             "id": self.id,
             "hash": self.hash,
-            # "docid": self.doc.id,
+            "docid": self.doc.id,
         }
 
