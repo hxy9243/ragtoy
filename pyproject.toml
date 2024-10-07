@@ -16,7 +16,7 @@ ragtoy = "command.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-tiktoken = "^0.3.0"
+tiktoken = "^0.8.0"
 python-dotenv = "^1.0.0"
 click = "^8.1.7"
 llama-index-core = "^0.11.1"
